@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mathematical Expression صحّح الواجب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kufam:wght@500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fffdf6; --card:#ffffff; --grid:#dfe8f3; --ink:#22335b; --muted:#6a7896; --line:#e4e9f2;
+  --red:#e23b3b; --green:#2e9e5b; --blue:#3f63d9; --yellow:#ffe66d; --orange:#ff9f40; --lcd:#cfe8b4; --lcdink:#24401c;
+  --code:#1f2a48; --code2:#28355a;
+  --mono:'Courier Prime',monospace; --disp:'Kufam','IBM Plex Sans Arabic',sans-serif;
+  --s:min(1vh,.56vw); --s:min(1dvh,.56vw);
+  --gap:calc(var(--s)*1.8); --r:calc(var(--s)*1.8);
+  --shadow:0 calc(var(--s)*1) calc(var(--s)*2.6) rgba(34,51,91,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'IBM Plex Sans Arabic',sans-serif;color:var(--ink);overflow:hidden;font-size:calc(var(--s)*2.2);
+  background:
+    linear-gradient(90deg,transparent calc(100% - 46px),rgba(226,59,59,.35) calc(100% - 46px),rgba(226,59,59,.35) calc(100% - 44px),transparent calc(100% - 44px)),
+    linear-gradient(var(--grid) 1px,transparent 1px) 0 0/26px 26px,
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/26px 26px,
+    var(--paper)}
+button{font:inherit;color:inherit}
+.ltr{direction:ltr;unicode-bidi:isolate;font-family:var(--mono)}
+.app{height:100vh;height:100dvh;display:grid;grid-template-rows:auto 1fr auto}
+
+/* header: notebook cover strip */
+.top{display:flex;align-items:center;justify-content:space-between;gap:calc(var(--s)*2);padding:calc(var(--s)*1) calc(var(--s)*3);background:var(--blue);color:#fff;position:relative;z-index:5;box-shadow:0 4px 14px rgba(34,51,91,.18)}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:6px;background:repeating-linear-gradient(90deg,#fff 0 10px,transparent 10px 20px);opacity:.0}
+.brand{display:flex;align-items:center;gap:calc(var(--s)*1.4)}
+.logo{width:calc(var(--s)*5.6);height:calc(var(--s)*5.6);border-radius:calc(var(--s)*1.4);background:#fff;display:grid;place-items:center;flex:none;transform:rotate(-5deg);box-shadow:0 4px 10px rgba(0,0,0,.2)}
+.logo svg{width:62%;height:62%}
+.brand b{display:block;font-family:var(--disp);font-weight:800;font-size:calc(var(--s)*2.8);line-height:1.2}
+.brand b .en{font-family:var(--mono);font-weight:700;font-size:.82em;color:var(--yellow);margin-inline-end:8px}
+.brand span{font-size:calc(var(--s)*1.6);opacity:.8;font-family:var(--mono)}
+.stepper{display:flex;gap:calc(var(--s)*.4);background:rgba(255,255,255,.12);border-radius:999px;padding:calc(var(--s)*.5)}
+.step-btn{display:flex;align-items:center;gap:calc(var(--s)*.7);border:0;background:transparent;border-radius:999px;padding:calc(var(--s)*.4) calc(var(--s)*1.4) calc(var(--s)*.4) calc(var(--s)*.5);cursor:pointer;font-weight:600;font-size:calc(var(--s)*1.9);color:rgba(255,255,255,.75);transition:.25s}
+.step-btn i{font-style:normal;width:calc(var(--s)*3.2);height:calc(var(--s)*3.2);border-radius:50%;display:grid;place-items:center;border:2px solid rgba(255,255,255,.6);font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*1.7)}
+.step-btn.done i{background:var(--green);border-color:var(--green)}
+.step-btn.active{background:#fff;color:var(--blue)}
+.step-btn.active i{background:var(--red);border-color:var(--red);color:#fff}
+@media(max-width:1100px){.step-btn span{display:none}.step-btn{padding:calc(var(--s)*.4)}}
+
+/* screens */
+.stage{position:relative;overflow:hidden;overflow:clip}
+.screen{position:absolute;inset:0;padding:calc(var(--s)*1.8) calc(var(--s)*3.5) calc(var(--s)*2) calc(var(--s)*3);padding-right:calc(var(--s)*3 + 46px);overflow:auto;display:flex;flex-direction:column;gap:var(--gap);opacity:0;visibility:hidden;transform:translateY(14px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1),visibility .5s}
+.screen.active{opacity:1;visibility:visible;transform:none}
+.screen>*{width:100%}
+.screen-head{display:flex;align-items:center;justify-content:space-between;gap:calc(var(--s)*1.6);flex-wrap:wrap;flex:none}
+.screen-head>div:first-child{display:flex;align-items:center;gap:calc(var(--s)*1.6)}
+.kicker{font-family:var(--disp);font-weight:700;font-size:calc(var(--s)*1.9);color:var(--red);padding:calc(var(--s)*.2) calc(var(--s)*1.6);border:2.5px solid var(--red);border-radius:50% 45% 55% 48% / 60% 50% 55% 45%;white-space:nowrap;transform:rotate(-4deg)}
+.screen-head h2{font-family:var(--disp);font-weight:800;font-size:calc(var(--s)*3.6);line-height:1.3}
+.screen-head h2 .hl{background:linear-gradient(transparent 55%,var(--yellow) 55%,var(--yellow) 90%,transparent 90%);padding:0 4px}
+.screen-head p{color:var(--muted);font-size:calc(var(--s)*2.1);font-weight:500}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);flex:1;min-height:0}
+.split>*{min-height:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:calc(var(--s)*2);box-shadow:var(--shadow);position:relative}
+.card.tape::before{content:"";position:absolute;top:calc(var(--s)*-1.2);left:50%;width:calc(var(--s)*12);height:calc(var(--s)*2.6);background:rgba(255,230,109,.75);transform:translateX(-50%) rotate(-3deg);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.label{font-size:calc(var(--s)*1.8);font-weight:600;color:var(--muted);margin-bottom:calc(var(--s)*.7);display:block}
+
+/* buttons */
+.btn{font-weight:700;font-size:calc(var(--s)*2.1);border:2px solid var(--ink);border-radius:calc(var(--s)*1.3);padding:calc(var(--s)*.8) calc(var(--s)*2.4);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:calc(var(--s)*.9);white-space:nowrap;background:#fff;transition:transform .18s cubic-bezier(.22,1,.36,1),box-shadow .2s,background .2s,opacity .2s}
+.btn svg{width:calc(var(--s)*2.4);height:calc(var(--s)*2.4);flex:none}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(34,51,91,.15)}
+.btn:active{transform:translateY(1px) scale(.98)}
+.btn.blue{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.btn.green{background:var(--green);border-color:var(--green);color:#fff}
+.btn.icon{padding-inline:calc(var(--s)*1.2)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.btn.pulse{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(63,99,217,.5)}50%{box-shadow:0 0 0 12px rgba(63,99,217,0)}}
+.chips{display:flex;gap:calc(var(--s)*.8);flex-wrap:wrap}
+.chip{font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*2);padding:calc(var(--s)*.3) calc(var(--s)*1.3);border-radius:calc(var(--s)*.8);border:1.5px dashed #b8c4d9;background:#fff;cursor:pointer;direction:ltr;transition:.2s}
+.chip:hover{border-color:var(--ink)}
+.chip.active{border:2px solid var(--blue);background:#eef2fd;color:var(--blue)}
+.controls{display:flex;gap:calc(var(--s)*1);flex-wrap:wrap;align-items:center}
+.sndbtn.off .w{display:none}.sndbtn .x{display:none}.sndbtn.off .x{display:inline}
+
+/* dock */
+.dock{display:flex;align-items:center;gap:calc(var(--s)*1.6);background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:calc(var(--s)*.8) calc(var(--s)*1.6);flex:none;flex-wrap:wrap;box-shadow:var(--shadow)}
+.dock .txt{flex:1;min-width:200px;font-weight:500;font-size:calc(var(--s)*2.3);line-height:1.6}
+.dock .txt b{color:var(--red)}
+.av{width:calc(var(--s)*6.2);height:calc(var(--s)*6.2);border-radius:calc(var(--s)*1.6);background:#e9eefc;overflow:hidden;flex:none;border:2px solid var(--blue)}
+.av svg{width:100%;height:100%;display:block}
+
+/* calculator character */
+.calc-char{flex:1 1 0;min-height:0;width:100%;--face:1;--happy:0;--oops:0;--think:0;filter:drop-shadow(0 16px 18px rgba(34,51,91,.22));animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.calc-char.digits{--face:0}
+.calc-char.happy{--happy:1}
+.calc-char.oops{--oops:1}
+.calc-char.think{--think:1}
+.calc-char .blink{transform-box:fill-box;transform-origin:center;animation:blink 4s infinite}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95.5%{transform:scaleY(.1)}}
+.calc-char .armR{transform-box:view-box;transform-origin:186px 150px;animation:wave 2.6s ease-in-out infinite}
+@keyframes wave{0%,100%{transform:rotate(0)}50%{transform:rotate(-12deg)}}
+.calc-char .armL{transform-box:view-box;transform-origin:56px 160px;transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+.calc-char.write .armL{transform:rotate(18deg)}
+.calc-char .key{transition:fill .1s}
+.calc-char .key.press{fill:#ffe66d}
+
+/* ===== 1. homework game ===== */
+.story{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:var(--gap)}
+.story>*{min-height:0}
+.hero{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
+.bubble{background:#fff;border:2px solid var(--ink);border-radius:calc(var(--s)*2.2);padding:calc(var(--s)*1.2) calc(var(--s)*2.6);font-weight:600;font-size:calc(var(--s)*2.5);line-height:1.55;max-width:calc(var(--s)*56);text-align:center;position:relative;margin-bottom:calc(var(--s)*2.4);flex:none;box-shadow:4px 4px 0 rgba(34,51,91,.12)}
+.bubble::after{content:"";position:absolute;bottom:calc(var(--s)*-1.25);left:50%;width:calc(var(--s)*2.2);height:calc(var(--s)*2.2);background:#fff;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:translateX(-50%) rotate(45deg)}
+.bubble b{color:var(--red)}
+.bubble.pop{animation:bpop .45s cubic-bezier(.22,1,.36,1)}
+@keyframes bpop{0%{transform:scale(.92)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+.hw{display:flex;flex-direction:column;gap:calc(var(--s)*1.3);background:
+  linear-gradient(transparent calc(100% - 1px),#c9d6ea calc(100% - 1px)) 0 0/100% calc(var(--s)*5),#fff}
+.hw-top{display:flex;align-items:center;justify-content:space-between;gap:calc(var(--s)*1.2)}
+.hw-title{font-family:var(--disp);font-weight:700;font-size:calc(var(--s)*2.4)}
+.dots{display:flex;gap:7px;direction:ltr}
+.dots i{width:calc(var(--s)*2.2);height:calc(var(--s)*2.2);border-radius:50%;border:2px solid #b8c4d9;display:grid;place-items:center;font-style:normal;font-size:calc(var(--s)*1.5);font-weight:700;color:#fff;transition:.3s}
+.dots i.cur{border-color:var(--blue);background:#eef2fd}
+.dots i.ok{background:var(--green);border-color:var(--green)}
+.dots i.no{background:var(--red);border-color:var(--red)}
+.score{font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*2.4);color:var(--green)}
+.eqwrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+.eq{position:relative;display:flex;align-items:baseline;gap:calc(var(--s)*1.8);direction:ltr;font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*9);color:var(--ink);line-height:1}
+.eq span{display:inline-block}
+.eq .op{color:var(--blue)}
+.eq .ans{position:relative}
+.eq .strike{position:absolute;left:-12%;top:-10%;width:124%;height:120%;overflow:visible;pointer-events:none}
+.eq .strike path{fill:none;stroke:var(--red);stroke-width:7;stroke-linecap:round}
+.eq .fix{position:absolute;left:50%;top:-58%;transform:translateX(-50%) rotate(-6deg);color:var(--red);font-size:.6em;clip-path:inset(0 100% 0 0);white-space:nowrap}
+.check{position:absolute;right:-22%;top:-30%;width:calc(var(--s)*10);height:calc(var(--s)*10);overflow:visible}
+.check path{fill:none;stroke:var(--green);stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
+.judge{display:flex;align-items:center;justify-content:center;gap:calc(var(--s)*2)}
+.jbtn{display:flex;align-items:center;gap:calc(var(--s)*1);border:2.5px solid;background:#fff;cursor:pointer;border-radius:calc(var(--s)*1.4);padding:calc(var(--s)*.8) calc(var(--s)*2.6);font-weight:700;font-size:calc(var(--s)*2.4);transition:transform .25s cubic-bezier(.3,1.5,.5,1),background .2s,color .2s,opacity .2s}
+.jbtn svg{width:calc(var(--s)*3);height:calc(var(--s)*3)}
+.jbtn.y{border-color:var(--green);color:var(--green)}
+.jbtn.n{border-color:var(--red);color:var(--red)}
+.jbtn:hover:not(:disabled){transform:translateY(-3px) rotate(-2deg)}
+.jbtn.y.chosen{background:var(--green);color:#fff}
+.jbtn.n.chosen{background:var(--red);color:#fff}
+.jbtn:disabled{cursor:default;opacity:.35}
+.jbtn.chosen:disabled{opacity:1}
+.outline{display:flex;align-items:center;justify-content:center;gap:calc(var(--s)*1.4);min-height:calc(var(--s)*6.2)}
+.outline .lbl{font-weight:600;color:var(--muted);font-size:calc(var(--s)*2)}
+.outline .val{font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*3.6);padding:0 calc(var(--s)*1.6);border-radius:calc(var(--s)*1);opacity:0;direction:ltr}
+.outline .val.y{background:#e3f4ea;color:var(--green)} .outline .val.n{background:#fde8e8;color:var(--red)}
+.outline .note{font-weight:600;font-size:calc(var(--s)*2);color:var(--muted)}
+
+/* ===== 2. analysis ===== */
+.an-grid{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:calc(var(--gap) * 1.3) var(--gap)}
+.an{display:flex;flex-direction:column;gap:calc(var(--s)*.8);overflow:visible;padding:calc(var(--s)*1.5) calc(var(--s)*2.2);transition:box-shadow .4s,transform .4s}
+.an-top{display:flex;align-items:center;gap:calc(var(--s)*1.3);flex:none}
+.an-ic{width:calc(var(--s)*5);height:calc(var(--s)*5);border-radius:calc(var(--s)*1.2);display:grid;place-items:center;flex:none;color:#fff}
+.an-ic svg{width:55%;height:55%}
+.an-top h3{font-family:var(--disp);font-weight:700;font-size:calc(var(--s)*2.9)}
+.an-top .num{margin-inline-start:auto;font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*2);color:#b8c4d9}
+.an-body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--s)*1.1);text-align:center;transition:opacity .45s,transform .45s cubic-bezier(.22,1,.36,1)}
+.an.locked .an-body{opacity:0;transform:translateY(14px);pointer-events:none}
+.an .q{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*13);color:rgba(34,51,91,.06);transition:opacity .4s;pointer-events:none}
+.an:not(.locked) .q{opacity:0}
+.an.locked .an-top{opacity:.5}
+.an.fresh{box-shadow:0 0 0 3px var(--yellow),var(--shadow);transform:rotate(-.4deg)}
+.an small{color:var(--muted);font-weight:500;font-size:calc(var(--s)*2)}
+.parts{display:flex;gap:calc(var(--s)*.8);direction:ltr;align-items:flex-end}
+.part{display:flex;flex-direction:column;align-items:center;gap:calc(var(--s)*.3)}
+.part b{font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*4.2);border:2px solid var(--ink);border-radius:calc(var(--s)*.9);min-width:calc(var(--s)*6.4);padding:0 calc(var(--s)*.8);line-height:1.35}
+.part.op b{color:var(--blue);border-color:var(--blue)} .part.eqs b{color:var(--muted);border-style:dashed}
+.part small{font-size:calc(var(--s)*1.6)}
+.ex{display:flex;flex-direction:column;gap:calc(var(--s)*.8);width:100%;max-width:calc(var(--s)*56)}
+.ex div{display:flex;align-items:center;justify-content:space-between;gap:calc(var(--s)*1.2);direction:ltr;font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*2.6);background:var(--code);color:#eef2ff;border-radius:calc(var(--s)*1);padding:calc(var(--s)*.4) calc(var(--s)*1.6)}
+.ex i{font-style:normal;color:#8ea0c9}
+.ex .y{color:#7be0a5} .ex .n{color:#ff8e8e}
+.trap{display:flex;flex-direction:column;gap:calc(var(--s)*.8);width:100%;max-width:calc(var(--s)*60)}
+.trap div{display:flex;align-items:center;gap:calc(var(--s)*1.2);font-size:calc(var(--s)*2);font-weight:600;text-align:start}
+.trap code{font-family:var(--mono);font-weight:700;font-size:1.2em;direction:ltr;unicode-bidi:isolate;background:#fde8e8;color:var(--red);border-radius:6px;padding:0 6px;white-space:nowrap}
+.trap code.g{background:#e3f4ea;color:var(--green)}
+.route{display:flex;flex-direction:column;gap:calc(var(--s)*.6);direction:ltr}
+.route div{display:flex;align-items:center;gap:calc(var(--s)*1.2);font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*2.5)}
+.route .sg{color:#fff;background:var(--blue);min-width:1.8em;text-align:center;border-radius:6px}
+.route i{font-style:normal;color:#b8c4d9}
+
+/* memory */
+.mrow{display:flex;gap:calc(var(--s)*1);direction:ltr;justify-content:center;flex-wrap:wrap}
+.mbox{display:flex;flex-direction:column;align-items:center;gap:calc(var(--s)*.3)}
+.mbox .nm{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-weight:700;color:var(--muted);font-size:calc(var(--s)*1.9)}
+.tag{font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*1.5);padding:0 calc(var(--s)*.6);border-radius:4px;line-height:1.5;color:#fff}
+.tag.int{background:var(--blue)} .tag.str{background:var(--orange)}
+.mbox b{min-width:calc(var(--s)*9.6);height:calc(var(--s)*7.4);display:grid;place-items:center;border-radius:calc(var(--s)*1.1);background:#fff;border:2px solid var(--ink);font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*3.4);padding:0 calc(var(--s)*.9);transition:background .3s,border-color .3s,box-shadow .3s}
+.mbox.empty b{color:#b8c4d9;border-style:dashed}
+.mbox.cur b{background:#fff7c2;border-color:#e0b800}
+.mbox.s b{color:var(--orange)}
+.mbox.res b{border-color:var(--blue);border-width:3px}
+
+/* ===== 3. design ===== */
+.design{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr) minmax(0,.95fr);gap:var(--gap)}
+.design>*{min-height:0}
+.pseudo-card{display:flex;flex-direction:column}
+.pseudo{list-style:none;display:flex;flex-direction:column;gap:calc(var(--s)*.6);flex:1;min-height:0}
+.pseudo li{flex:1;min-height:0;max-height:calc(var(--s)*8);display:flex;gap:calc(var(--s)*1);align-items:center;padding:0 calc(var(--s)*1.3);border-radius:calc(var(--s)*1);background:#fff;border:1.5px solid var(--line);font-weight:600;font-size:calc(var(--s)*2.05);transition:background .35s,border-color .35s,opacity .45s,transform .45s cubic-bezier(.22,1,.36,1);opacity:0;transform:translateX(-18px)}
+.pseudo li.show{opacity:1;transform:none}
+.pseudo li .n{font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*2.1);color:#b8c4d9;flex:none;width:1.2em}
+.pseudo li.ind{margin-inline-start:calc(var(--s)*3)}
+.pseudo li.fresh{background:#e3f4ea;border-color:var(--green)}
+.pseudo li.cur{background:#fff7c2;border-color:#e0b800}
+.pseudo li.cur .n{color:var(--red)}
+.pseudo code{font-family:var(--mono);font-weight:700;direction:ltr;unicode-bidi:isolate;font-size:1.05em;color:var(--blue)}
+.progress{height:calc(var(--s)*1);border-radius:9px;background:var(--line);overflow:hidden;margin-top:calc(var(--s)*1);flex:none}
+.progress i{display:block;height:100%;width:0;background:var(--green);transition:width .45s cubic-bezier(.22,1,.36,1)}
+.flow-card{display:flex;align-items:center;justify-content:center;padding:calc(var(--s)*.6)}
+#flow{width:100%;height:100%}
+#flow .node{opacity:0;transform:scale(.55);transform-box:fill-box;transform-origin:center;transition:opacity .35s,transform .55s cubic-bezier(.3,1.5,.5,1)}
+#flow .node.show{opacity:1;transform:none}
+#flow .sh{fill:#fff;stroke:#22335b;stroke-width:2.2;stroke-linejoin:round;transition:fill .3s,stroke .3s}
+#flow .node.dec .sh{fill:#fffbe1;stroke:#d6a800}
+#flow .node.pr .sh{stroke:#3f63d9}
+#flow .node.okn .sh{stroke:#2e9e5b;stroke-width:3}
+#flow .node.bad .sh{stroke:#e23b3b;stroke-width:3}
+#flow text{fill:#22335b;font-size:14px;font-weight:600;text-anchor:middle;dominant-baseline:central;font-family:'IBM Plex Sans Arabic'}
+#flow text.mono{font-family:'Courier Prime';font-weight:700;font-size:14px}
+#flow text.cap{font-size:11px;fill:#6a7896}
+#flow .node.fresh .sh{fill:#e3f4ea}
+#flow .node.visited .sh{fill:#eef2fd}
+#flow .node.on .sh{fill:#3f63d9;stroke:#3f63d9}
+#flow .node.on text{fill:#fff}
+#flow .edge{opacity:0}
+#flow .edge.show{opacity:1}
+#flow .edge path{stroke:#6a7896;stroke-width:2.2;fill:none;marker-end:url(#arG);stroke-dasharray:100;stroke-dashoffset:0;stroke-linejoin:round;transition:stroke .3s,stroke-width .3s}
+#flow .edge.show path{animation:draw .6s ease both}
+@keyframes draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+#flow .edge text{font-size:12px;fill:#6a7896;font-weight:700}
+#flow .edge.on path{stroke:#e23b3b;stroke-width:4;marker-end:url(#arR)}
+.trace{display:flex;flex-direction:column;justify-content:space-between;gap:calc(var(--s)*1);transition:opacity .4s}
+.trace .btn{width:100%}
+.trace.locked{opacity:.35;pointer-events:none}
+.lcd{background:#2a3352;border-radius:calc(var(--s)*1.4);padding:calc(var(--s)*1);box-shadow:inset 0 2px 0 rgba(255,255,255,.08)}
+.lcd .scr{background:linear-gradient(180deg,#d6edbd,#c3e0a6);border-radius:calc(var(--s)*.8);min-height:calc(var(--s)*8);display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:calc(var(--s)*.4) calc(var(--s)*1.4);direction:ltr;font-family:var(--mono);font-weight:700;color:var(--lcdink);box-shadow:inset 0 2px 6px rgba(0,0,0,.2)}
+.lcd .scr .up{font-size:calc(var(--s)*2);opacity:.65;min-height:1.2em}
+.lcd .scr .main{font-size:calc(var(--s)*4.2);line-height:1.1;min-height:1.1em}
+.cmpbox{background:#fff;border:1.5px dashed #b8c4d9;border-radius:calc(var(--s)*1);padding:calc(var(--s)*.6);min-height:calc(var(--s)*6);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*2.5);direction:ltr;gap:10px;flex-wrap:wrap}
+.cmpbox .t{color:var(--green)} .cmpbox .f{color:var(--red)}
+.outbig{font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*4.2);min-height:calc(var(--s)*7);display:grid;place-items:center;background:var(--code);color:#eef2ff;border-radius:calc(var(--s)*1.2);direction:ltr}
+.outbig.y{color:#7be0a5} .outbig.n{color:#ff8e8e}
+
+/* ===== 4. ide ===== */
+.ide{background:var(--code);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.ide-bar{display:flex;align-items:center;gap:calc(var(--s)*1);padding:calc(var(--s)*.9) calc(var(--s)*2);background:var(--code2);direction:ltr;flex:none}
+.ide-bar .d{width:calc(var(--s)*1.5);height:calc(var(--s)*1.5);border-radius:50%}
+.ide-bar .tab{margin-left:calc(var(--s)*1.4);font-family:var(--mono);font-size:calc(var(--s)*2);color:#8ea0c9}
+.code{direction:ltr;text-align:left;font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*2.45);line-height:1.45;padding:calc(var(--s)*.8) 0;flex:1;overflow:auto;display:flex;flex-direction:column;justify-content:center}
+.ln{display:flex;padding:calc(var(--s)*.3) calc(var(--s)*2) calc(var(--s)*.3) calc(var(--s)*1.4);border-left:4px solid transparent;white-space:pre;color:#e6ebf7;transition:background .25s,opacity .3s}
+.ln .no{width:calc(var(--s)*4);color:#4f5f8a;flex:none;user-select:none}
+.ln.ran .no{color:#7be0a5}
+.ln.cur{background:rgba(255,230,109,.14);border-left-color:var(--yellow)}
+.ln.skip{opacity:.3}
+.sk{color:#ff8eb4}.sf{color:#7cc7ff}.ss{color:#ffd27a}
+.v1{color:#aee3ff}.v2{color:#ffb86b}.v3{color:#c9b6ff}.v4{color:#7be0a5}
+.mem{display:flex;flex-direction:column;justify-content:space-between;gap:calc(var(--s)*1.3)}
+.mem .mbox b{min-width:calc(var(--s)*9);height:calc(var(--s)*7.4);font-size:calc(var(--s)*3.4)}
+.calcl{display:flex;align-items:center;justify-content:center;gap:12px;direction:ltr;flex-wrap:wrap;background:#fff;border:1.5px dashed #b8c4d9;border-radius:calc(var(--s)*1.1);min-height:calc(var(--s)*7);font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*2.7);padding:calc(var(--s)*.5) calc(var(--s)*1.2)}
+.calcl .ph2{font-family:'IBM Plex Sans Arabic';font-weight:500;color:var(--muted);font-size:.72em;direction:rtl}
+.calcl .t{color:var(--green)} .calcl .f{color:var(--red)} .calcl .b{color:var(--blue)}
+.calcl .hl{background:var(--yellow);border-radius:6px;padding:0 6px}
+.console{background:var(--code);border-radius:calc(var(--s)*1.1);padding:calc(var(--s)*1) calc(var(--s)*2);font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*3.6);min-height:calc(var(--s)*8);direction:ltr;display:flex;align-items:center;gap:calc(var(--s)*1.4);color:#eef2ff}
+.console .pr{color:#4f5f8a}
+.console .y{color:#7be0a5} .console .n{color:#ff8e8e}
+.token{position:fixed;left:0;top:0;z-index:40;pointer-events:none;font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*3.2);background:var(--yellow);color:var(--ink);border:2px solid var(--ink);border-radius:calc(var(--s)*.8);padding:0 calc(var(--s)*1.1);box-shadow:3px 3px 0 rgba(34,51,91,.25);white-space:nowrap;will-change:transform}
+.token.b{background:#dbe5ff}
+.token.g{background:#c9f0d8}
+.token.r{background:#ffd1d1}
+.spark{position:fixed;left:0;top:0;pointer-events:none;z-index:70;border-radius:50%;will-change:transform}
+.spark.st{border-radius:2px}
+.ring{position:fixed;left:0;top:0;pointer-events:none;z-index:69;border:3px solid var(--yellow);border-radius:50%}
+.shake{animation:shake .45s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+
+/* ===== 5. test ===== */
+.tside{display:flex;flex-direction:column;gap:calc(var(--s)*1.6);justify-content:space-evenly}
+.test-in{display:flex;gap:calc(var(--s)*1);flex-wrap:wrap}
+.field{flex:1;min-width:200px;direction:ltr;font-family:var(--mono);font-weight:700;font-size:calc(var(--s)*3.8);padding:calc(var(--s)*.6) calc(var(--s)*2);border-radius:calc(var(--s)*1.1);border:2px solid var(--ink);background:#fff;color:var(--ink);outline:none;transition:box-shadow .2s}
+.field:focus{box-shadow:0 0 0 4px rgba(63,99,217,.2)}
+.err{color:var(--red);font-weight:600;font-size:calc(var(--s)*2);min-height:calc(var(--s)*3)}
+.tvis{display:flex;flex-direction:column;gap:calc(var(--s)*1.2)}
+.tvis .eqwrap{flex:1}
+.tvis .eq{font-size:calc(var(--s)*7)}
+.tsteps{display:flex;flex-direction:column;gap:calc(var(--s)*.6);flex:none}
+.tstep{display:flex;align-items:center;gap:calc(var(--s)*1.1);padding:calc(var(--s)*.5) calc(var(--s)*1.4);background:#fff;border:1.5px solid var(--line);border-radius:calc(var(--s)*1);font-weight:600;font-size:calc(var(--s)*2);opacity:.45;transition:opacity .3s,border-color .3s,background .3s}
+.tstep .n{font-family:var(--mono);font-weight:700;color:#b8c4d9}
+.tstep .r{margin-inline-start:auto;font-family:var(--mono);font-weight:700;direction:ltr;unicode-bidi:isolate;font-size:1.2em}
+.tstep .r.t{color:var(--green)} .tstep .r.f{color:var(--red)}
+.tstep.on{opacity:1;border-color:#e0b800;background:#fffbe1}
+.tstep.done{opacity:1}
+
+/* ===== 6. improve ===== */
+.seg{display:inline-flex;background:#fff;border:2px solid var(--ink);border-radius:calc(var(--s)*1.2);padding:3px;gap:3px}
+.seg button{border:0;background:transparent;font-weight:700;font-size:calc(var(--s)*2);padding:calc(var(--s)*.4) calc(var(--s)*1.6);border-radius:calc(var(--s)*.8);cursor:pointer;display:flex;align-items:center;gap:calc(var(--s)*.8);transition:.25s}
+.seg button b{font-family:var(--mono);font-size:calc(var(--s)*2)}
+.seg button.on{background:var(--blue);color:#fff}
+.imp-card{display:flex;flex-direction:column;gap:calc(var(--s)*1.4);justify-content:space-evenly}
+.imp-card h3{font-family:var(--disp);font-weight:700;font-size:calc(var(--s)*3);display:flex;align-items:center;gap:calc(var(--s)*1.3)}
+.imp-card p{color:var(--muted);font-weight:500;font-size:calc(var(--s)*2.4);line-height:1.6}
+.imp-card .art{flex:1 1 0;min-height:calc(var(--s)*10);max-height:calc(var(--s)*26);width:100%}
+
+/* bottom + sheets */
+.bottom{display:flex;align-items:center;justify-content:space-between;gap:calc(var(--s)*1.6);padding:calc(var(--s)*.9) calc(var(--s)*3);background:#fff;border-top:3px double #c9d6ea}
+.hints{display:flex;gap:calc(var(--s)*.8);flex-wrap:wrap;justify-content:center}
+.hint-btn{display:flex;align-items:center;gap:calc(var(--s)*.7);padding:calc(var(--s)*.45) calc(var(--s)*1.5);border-radius:999px;background:#fffbe1;border:1.5px solid #e0c64a;color:var(--ink);font-size:calc(var(--s)*1.9);font-weight:700;cursor:pointer;transition:transform .2s cubic-bezier(.22,1,.36,1),background .2s}
+.hint-btn:hover{transform:translateY(-2px) rotate(-1deg);background:#fff4b0}
+.hint-btn svg{width:calc(var(--s)*2.3);height:calc(var(--s)*2.3);flex:none;color:var(--red)}
+.sheet-wrap{position:fixed;inset:0;background:rgba(34,51,91,.35);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;z-index:50}
+.sheet-wrap.open{opacity:1;pointer-events:auto}
+.sheet{width:min(680px,100%);max-height:86vh;overflow:auto;background:#fff;border-radius:22px 22px 0 0;padding:14px 24px 26px;transform:translateY(100%);transition:transform .45s cubic-bezier(.22,1,.36,1);box-shadow:0 -10px 30px rgba(34,51,91,.2)}
+.sheet-wrap.open .sheet{transform:none}
+.grab{width:50px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 14px}
+.sheet-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.sheet-head .av{width:52px;height:52px}
+.sheet-head h3{font-family:var(--disp);font-weight:800;font-size:22px;flex:1}
+.x{width:40px;height:40px;border-radius:10px;border:2px solid var(--ink);background:#fff;cursor:pointer;display:grid;place-items:center}
+.x svg{width:18px;height:18px}
+.sheet-body p{line-height:1.85;font-weight:500;font-size:17px}
+.sheet-body p+p{margin-top:4px}
+pre.snip{direction:ltr;text-align:left;background:var(--code);color:#e6ebf7;border-radius:10px;padding:12px 16px;font-family:var(--mono);font-weight:700;font-size:16px;line-height:1.6;overflow:auto;margin-top:10px}
+.steps-mini{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:12px;direction:ltr;flex-wrap:wrap}
+.steps-mini .s{font-family:var(--mono);font-weight:700;font-size:17px;padding:5px 12px;border-radius:8px;border:2px solid var(--ink)}
+.steps-mini .s.g{color:var(--green);border-color:var(--green)} .steps-mini .s.r{color:var(--red);border-color:var(--red)}
+.steps-mini svg{width:20px;height:20px;color:var(--muted)}
+.sheet.big{width:min(1100px,96vw);height:min(90vh,calc(var(--s)*82));display:flex;flex-direction:column;padding:calc(var(--s)*1.6) calc(var(--s)*4) calc(var(--s)*3)}
+.sheet.big .sheet-head h3{font-size:calc(var(--s)*4)}
+.sheet.big .sheet-head .av{width:calc(var(--s)*7.5);height:calc(var(--s)*7.5)}
+.sheet.big .sheet-body{flex:1;min-height:0;display:flex;flex-direction:column}
+.nx{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:calc(var(--s)*1.6);text-align:center}
+.nx .g{font-family:var(--disp);font-weight:800;font-size:calc(var(--s)*3.4)}
+.nx .g b{background:linear-gradient(transparent 55%,var(--yellow) 55%)}
+.nx svg.art{flex:1 1 0;min-height:calc(var(--s)*14);width:100%}
+.nx .tip{display:flex;align-items:center;gap:calc(var(--s)*1.4);background:#fffbe1;border:2px solid #e0c64a;border-radius:calc(var(--s)*1.4);padding:calc(var(--s)*1.2) calc(var(--s)*2.6);font-size:calc(var(--s)*2.7);font-weight:700}
+.nx .tip svg{flex:none;width:calc(var(--s)*4);height:calc(var(--s)*4);color:var(--red)}
+.nx .try{color:var(--muted);font-weight:500;font-size:calc(var(--s)*2.3)}
+.nx .try a{color:var(--blue);font-weight:700}
+
+@media(max-width:1000px) and (min-width:821px){.design{grid-template-columns:1fr 1fr}.trace{grid-column:1 / -1}}
+@media(max-width:820px),(max-height:480px){
+  :root{--s:6.4px}
+  .story,.split,.an-grid,.design{grid-template-columns:1fr;grid-template-rows:none;flex:none}
+  .calc-char{flex:none;height:280px}
+  .eqwrap{flex:none;height:150px}
+  .an{min-height:220px}
+  .pseudo li{flex:none;height:44px}
+  .flow-card{height:620px}
+  .code{font-size:13px}
+  .screen{padding:14px 14px 20px}
+  .hint-btn span,.nav-txt,.brand span{display:none}
+  .hint-btn{padding:8px}
+  .top,.bottom{padding:8px 12px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="bodyG" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#5677e6"/><stop offset="1" stop-color="#3550b8"/></linearGradient>
+    <linearGradient id="lcdG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#dff2c9"/><stop offset="1" stop-color="#bfdda2"/></linearGradient>
+    <g id="calcTop">
+      <rect x="60" y="40" width="120" height="104" rx="22" fill="url(#bodyG)"/>
+      <rect x="132" y="48" width="38" height="10" rx="3" fill="#22335b"/>
+      <path d="M140 48 V58 M149 48 V58 M158 48 V58" stroke="#3f4f7a" stroke-width="1.5"/>
+      <rect x="72" y="64" width="96" height="66" rx="10" fill="#22335b"/>
+      <rect x="77" y="69" width="86" height="56" rx="7" fill="url(#lcdG)"/>
+      <g style="opacity:var(--face,1)">
+        <g style="opacity:calc(1 - max(var(--happy,0), var(--oops,0)))">
+          <rect class="blink" x="96" y="84" width="9" height="15" rx="4" fill="#24401c" style="transform:translateY(calc(var(--think,0) * -4px))"/>
+          <rect class="blink" x="135" y="84" width="9" height="15" rx="4" fill="#24401c" style="transform:translateY(calc(var(--think,0) * -4px))"/>
+        </g>
+        <g style="opacity:var(--happy,0)" stroke="#24401c" stroke-width="4" fill="none" stroke-linecap="round"><path d="M93 95 Q100 85 107 95"/><path d="M132 95 Q139 85 146 95"/></g>
+        <g style="opacity:var(--oops,0)" stroke="#24401c" stroke-width="3.5" stroke-linecap="round"><path d="M95 86 L106 97 M106 86 L95 97"/><path d="M134 86 L145 97 M145 86 L134 97"/></g>
+        <g style="opacity:calc(1 - max(var(--oops,0), var(--think,0)))"><path d="M108 108 Q120 117 132 108" stroke="#24401c" stroke-width="3.5" fill="none" stroke-linecap="round"/></g>
+        <g style="opacity:var(--oops,0)"><path d="M110 113 Q120 105 130 113" stroke="#24401c" stroke-width="3.5" fill="none" stroke-linecap="round"/></g>
+        <g style="opacity:var(--think,0)"><circle cx="112" cy="111" r="2.4" fill="#24401c"/><circle cx="120" cy="111" r="2.4" fill="#24401c"/><circle cx="128" cy="111" r="2.4" fill="#24401c"/></g>
+        <circle cx="88" cy="106" r="4" fill="#ff8f8f" opacity=".35"/><circle cx="152" cy="106" r="4" fill="#ff8f8f" opacity=".35"/>
+      </g>
+    </g>
+  </defs>
+</svg>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#3f63d9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><rect x="8" y="5.5" width="8" height="4" rx="1" fill="#cfe8b4"/><path d="M8.5 13h1M11.5 13h1M14.5 13h1M8.5 16.5h1M11.5 16.5h1M14.5 16.5h1"/></svg></div>
+      <div><b><span class="en">Mathematical Expression</span>صحّح الواجب</b><span>Sheet #1 · Problem W</span></div>
+    </div>
+    <nav class="stepper" id="stepper"></nav>
+  </header>
+
+  <main class="stage">
+
+    <!-- ===== 1 ===== -->
+    <section class="screen active" data-title="الفكرة">
+      <div class="screen-head">
+        <div><span class="kicker">المرحلة 1</span><h2>الفكرة: <span class="hl">صحّح</span> المسألة، ولو غلط اكتب الصح</h2></div>
+        <p>الآلة الحاسبة هتراجع وراك</p>
+      </div>
+      <div class="story">
+        <div class="hero">
+          <div class="bubble" id="calcSay">دي واجبات الطلبة، صحّحها معايا!<br>صح؟ يبقى <b>Yes</b>. غلط؟ نكتب الإجابة الصح</div>
+          <svg class="calc-char" id="calcChar" viewBox="20 30 200 270" aria-label="الآلة الحاسبة">
+            <ellipse cx="120" cy="292" rx="56" ry="7" fill="rgba(34,51,91,.18)"/>
+            <rect x="92" y="238" width="13" height="40" rx="6" fill="#22335b"/><rect x="135" y="238" width="13" height="40" rx="6" fill="#22335b"/>
+            <path d="M80 276 Q76 290 98 290 L108 290 L108 276Z" fill="#e23b3b"/><path d="M132 276 L132 290 L142 290 Q164 290 160 276Z" fill="#e23b3b"/>
+            <g class="armL">
+              <path d="M62 160 Q40 176 44 206" stroke="#22335b" stroke-width="9" fill="none" stroke-linecap="round"/>
+              <g transform="translate(46 206) rotate(-35)"><rect x="-4" y="-34" width="8" height="40" rx="2" fill="#e23b3b"/><path d="M-4 6 L0 14 L4 6Z" fill="#22335b"/><rect x="-4" y="-34" width="8" height="7" rx="2" fill="#a92525"/></g>
+              <circle cx="44" cy="208" r="9" fill="#ffffff" stroke="#22335b" stroke-width="2.5"/>
+            </g>
+            <g class="armR">
+              <path d="M178 156 Q200 140 204 112" stroke="#22335b" stroke-width="9" fill="none" stroke-linecap="round"/>
+              <circle cx="204" cy="108" r="9" fill="#ffffff" stroke="#22335b" stroke-width="2.5"/>
+            </g>
+            <rect x="60" y="40" width="120" height="206" rx="22" fill="url(#bodyG)"/>
+            <rect x="64" y="44" width="112" height="198" rx="19" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
+            <use href="#calcTop"/>
+            <text id="lcdUp" x="158" y="84" text-anchor="end" font-family="Courier Prime" font-weight="700" font-size="11" fill="#24401c" opacity=".7" direction="ltr"></text>
+            <text id="lcdMain" x="158" y="114" text-anchor="end" font-family="Courier Prime" font-weight="700" font-size="26" fill="#24401c" direction="ltr"></text>
+            <g id="keys">
+              <rect class="key" data-k="7" x="76" y="148" width="18" height="15" rx="4" fill="#eef2ff"/><rect class="key" data-k="8" x="99" y="148" width="18" height="15" rx="4" fill="#eef2ff"/><rect class="key" data-k="9" x="122" y="148" width="18" height="15" rx="4" fill="#eef2ff"/><rect class="key" data-k="*" x="145" y="148" width="18" height="15" rx="4" fill="#ff9f40"/>
+              <rect class="key" data-k="4" x="76" y="169" width="18" height="15" rx="4" fill="#eef2ff"/><rect class="key" data-k="5" x="99" y="169" width="18" height="15" rx="4" fill="#eef2ff"/><rect class="key" data-k="6" x="122" y="169" width="18" height="15" rx="4" fill="#eef2ff"/><rect class="key" data-k="-" x="145" y="169" width="18" height="15" rx="4" fill="#ff9f40"/>
+              <rect class="key" data-k="1" x="76" y="190" width="18" height="15" rx="4" fill="#eef2ff"/><rect class="key" data-k="2" x="99" y="190" width="18" height="15" rx="4" fill="#eef2ff"/><rect class="key" data-k="3" x="122" y="190" width="18" height="15" rx="4" fill="#eef2ff"/><rect class="key" data-k="+" x="145" y="190" width="18" height="15" rx="4" fill="#ff9f40"/>
+              <rect class="key" data-k="0" x="76" y="211" width="41" height="15" rx="4" fill="#eef2ff"/><rect class="key" data-k="c" x="122" y="211" width="18" height="15" rx="4" fill="#c9d3f0"/><rect class="key" data-k="=" x="145" y="211" width="18" height="15" rx="4" fill="#e23b3b"/>
+              <g font-family="Courier Prime" font-weight="700" font-size="10" text-anchor="middle" fill="#22335b" pointer-events="none">
+                <text x="85" y="159">7</text><text x="108" y="159">8</text><text x="131" y="159">9</text><text x="154" y="159" fill="#fff">×</text>
+                <text x="85" y="180">4</text><text x="108" y="180">5</text><text x="131" y="180">6</text><text x="154" y="180" fill="#fff">−</text>
+                <text x="85" y="201">1</text><text x="108" y="201">2</text><text x="131" y="201">3</text><text x="154" y="201" fill="#fff">+</text>
+                <text x="96" y="222">0</text><text x="131" y="222">C</text><text x="154" y="222" fill="#fff">=</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="card hw tape">
+          <div class="hw-top">
+            <span class="hw-title">الواجب</span>
+            <div class="dots" id="dots"></div>
+            <span class="controls"><span class="score" id="score">0/6</span><button class="btn icon sndbtn" aria-label="الصوت"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4z"/><path class="w" d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/><path class="x" d="M16 9l6 6M22 9l-6 6"/></svg></button></span>
+          </div>
+          <div class="eqwrap" id="gEq"></div>
+          <div class="outline"><span class="lbl">المخرج:</span><span class="val" id="gOut"></span><span class="note" id="gNote"></span></div>
+          <div class="judge">
+            <button class="jbtn y" id="jY"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>صح</button>
+            <button class="jbtn n" id="jN"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>غلط</button>
+            <button class="btn blue" id="gNext" style="display:none">المسألة الجاية<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 2 ===== -->
+    <section class="screen" data-title="التحليل">
+      <div class="screen-head">
+        <div><span class="kicker">المرحلة 2</span><h2>التحليل: نفهم المسألة حتة حتة</h2></div>
+      </div>
+      <div class="an-grid">
+        <div class="card an locked tape">
+          <div class="an-top"><div class="an-ic" style="background:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 20h16"/></svg></div><h3>المدخلات</h3><span class="num">01</span></div>
+          <div class="an-body">
+            <div class="parts"><div class="part"><b>5</b><small>رقم</small></div><div class="part op"><b>*</b><small>عملية</small></div><div class="part"><b>2</b><small>رقم</small></div><div class="part eqs"><b>=</b><small>علامة</small></div><div class="part"><b>12</b><small>الإجابة</small></div></div>
+            <small>5 حاجات في سطر واحد بينهم مسافات</small>
+          </div>
+          <div class="q">?</div>
+        </div>
+        <div class="card an locked tape">
+          <div class="an-top"><div class="an-ic" style="background:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3>المخرجات</h3><span class="num">02</span></div>
+          <div class="an-body">
+            <div class="ex">
+              <div><span>3 + 4 = 7</span><i>→</i><span class="y">Yes</span></div>
+              <div><span>5 * 2 = 12</span><i>→</i><span class="n">10</span></div>
+            </div>
+            <small>صح: Yes. غلط: الناتج الصح نفسه</small>
+          </div>
+          <div class="q">?</div>
+        </div>
+        <div class="card an locked tape">
+          <div class="an-top"><div class="an-ic" style="background:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l10 18H2z"/><path d="M12 9v5M12 17.5v.5"/></svg></div><h3>الفخاخ</h3><span class="num">03</span></div>
+          <div class="an-body">
+            <div class="trap">
+              <div><code>No</code><span>مش مطلوبة! لو غلط نطبع الإجابة الصح</span></div>
+              <div><code class="g">*</code><span>يعني ضرب، مش ×</span></div>
+              <div><code>"3"+"4"</code><span>من غير int هتطلع "34"</span></div>
+            </div>
+          </div>
+          <div class="q">?</div>
+        </div>
+        <div class="card an locked tape">
+          <div class="an-top"><div class="an-ic" style="background:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></div><h3>الحل</h3><span class="num">04</span></div>
+          <div class="an-body">
+            <div class="route">
+              <div><span class="sg">+</span><i>→</i><span>first + second</span></div>
+              <div><span class="sg">-</span><i>→</i><span>first - second</span></div>
+              <div><span class="sg">*</span><i>→</i><span>first * second</span></div>
+            </div>
+            <small>احسب الناتج الحقيقي، وقارنه بالإجابة المكتوبة</small>
+          </div>
+          <div class="q">?</div>
+        </div>
+      </div>
+      <div class="dock">
+        <div class="av"><svg viewBox="56 36 128 112"><use href="#calcTop"/></svg></div>
+        <div class="txt" id="anSay"></div>
+        <div class="controls">
+          <button class="btn blue" id="anNext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><span id="anNextTxt">اكشف</span></button>
+          <button class="btn icon" id="anReset" aria-label="من الأول"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 3 ===== -->
+    <section class="screen" data-title="التصميم">
+      <div class="screen-head">
+        <div><span class="kicker">المرحلة 3</span><h2>التصميم: نبني الحل خطوة بخطوة</h2></div>
+        <p>كل ضغطة = سطر سودو كود + شكل في الفلوتشارت</p>
+      </div>
+      <div class="design">
+        <div class="card pseudo-card">
+          <span class="label">السودو كود</span>
+          <ol class="pseudo" id="pseudo">
+            <li><span class="n">1</span>ابدأ</li>
+            <li><span class="n">2</span>اقرأ <code>first sign second = answer</code></li>
+            <li><span class="n">3</span>لو <code>sign = "+"</code>: <code>result ← first + second</code></li>
+            <li><span class="n">4</span>لو <code>sign = "-"</code>: <code>result ← first − second</code></li>
+            <li><span class="n">5</span>غير كده: <code>result ← first × second</code></li>
+            <li><span class="n">6</span>لو <code>result = answer</code>: اطبع <code>Yes</code></li>
+            <li class="ind"><span class="n">7</span>غير كده: اطبع <code>result</code></li>
+            <li><span class="n">8</span>انتهي</li>
+          </ol>
+          <div class="progress"><i id="buildBar"></i></div>
+        </div>
+        <div class="card flow-card">
+          <svg id="flow" viewBox="40 6 420 702">
+            <defs>
+              <marker id="arG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#6a7896"/></marker>
+              <marker id="arR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#e23b3b"/></marker>
+            </defs>
+            <g class="edge" id="e-1"><path pathLength="100" d="M180 56 V74"/></g>
+            <g class="edge" id="e-2"><path pathLength="100" d="M180 120 V139"/></g>
+            <g class="edge" id="e-y1"><path pathLength="100" d="M262 185 H290"/><text x="276" y="174">نعم</text></g>
+            <g class="edge" id="e-n1"><path pathLength="100" d="M180 231 V260"/><text x="196" y="246">لا</text></g>
+            <g class="edge" id="e-y2"><path pathLength="100" d="M262 306 H290"/><text x="276" y="295">نعم</text></g>
+            <g class="edge" id="e-n2"><path pathLength="100" d="M180 352 V382"/><text x="196" y="367">لا</text></g>
+            <g class="edge" id="e-m1"><path pathLength="100" d="M436 185 H450 V452 H186"/></g>
+            <g class="edge" id="e-m2"><path pathLength="100" d="M436 306 H450 V452 H186"/></g>
+            <g class="edge" id="e-m3"><path pathLength="100" d="M180 428 V470"/></g>
+            <g class="edge" id="e-y3"><path pathLength="100" d="M262 516 H290"/><text x="276" y="505">نعم</text></g>
+            <g class="edge" id="e-n3"><path pathLength="100" d="M180 562 V590"/><text x="196" y="576">لا</text></g>
+            <g class="edge" id="e-re"><path pathLength="100" d="M361 538 V680 H232"/></g>
+            <g class="edge" id="e-we"><path pathLength="100" d="M180 636 V656"/></g>
+            <g class="node" id="n-start"><rect class="sh" x="130" y="12" width="100" height="44" rx="22"/><text x="180" y="34">ابدأ</text></g>
+            <g class="node" id="n-in"><path class="sh" d="M96 76 H284 L264 120 H76Z"/><text x="180" y="98" class="mono" direction="ltr">first sign second = answer</text></g>
+            <g class="node dec" id="n-d1"><path class="sh" d="M180 141 L262 185 L180 229 L98 185Z"/><text x="180" y="185" class="mono" direction="ltr">sign == "+"</text></g>
+            <g class="node pr" id="n-p1"><rect class="sh" x="292" y="163" width="144" height="44" rx="8"/><text x="364" y="157" class="cap" direction="ltr">result =</text><text x="364" y="185" class="mono" direction="ltr">first + second</text></g>
+            <g class="node dec" id="n-d2"><path class="sh" d="M180 262 L262 306 L180 350 L98 306Z"/><text x="180" y="306" class="mono" direction="ltr">sign == "-"</text></g>
+            <g class="node pr" id="n-p2"><rect class="sh" x="292" y="284" width="144" height="44" rx="8"/><text x="364" y="278" class="cap" direction="ltr">result =</text><text x="364" y="306" class="mono" direction="ltr">first - second</text></g>
+            <g class="node pr" id="n-p3"><rect class="sh" x="100" y="384" width="160" height="44" rx="8"/><text x="180" y="378" class="cap" direction="ltr">result =</text><text x="180" y="406" class="mono" direction="ltr">first * second</text></g>
+            <g class="node dec" id="n-d3"><path class="sh" d="M180 472 L262 516 L180 560 L98 516Z"/><text x="180" y="516" class="mono" direction="ltr">result == answer</text></g>
+            <g class="node okn" id="n-oR"><path class="sh" d="M308 494 H436 L416 538 H288Z"/><text x="362" y="516">اطبع Yes</text></g>
+            <g class="node bad" id="n-oW"><path class="sh" d="M112 592 H268 L248 636 H92Z"/><text x="180" y="614">اطبع result</text></g>
+            <g class="node" id="n-end"><rect class="sh" x="130" y="658" width="100" height="44" rx="22"/><text x="180" y="680">انتهي</text></g>
+          </svg>
+        </div>
+        <div class="card trace locked" id="trace">
+          <div><span class="label">جرّب على مثال</span><div class="chips" id="flowChips"></div></div>
+          <button class="btn green" id="flowRun"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>تشغيل</button>
+          <div><span class="label">الآلة الحاسبة</span><div class="lcd"><div class="scr"><div class="up" id="fUp"></div><div class="main" id="fMain"></div></div></div></div>
+          <div><span class="label">المقارنة</span><div class="cmpbox" id="fCmp">—</div></div>
+          <div><span class="label">المخرج</span><div class="outbig" id="fOut"></div></div>
+        </div>
+      </div>
+      <div class="dock">
+        <div class="av"><svg viewBox="56 36 128 112"><use href="#calcTop"/></svg></div>
+        <div class="txt" id="dsSay"></div>
+        <div class="controls">
+          <button class="btn blue" id="bNext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span id="bNextTxt"></span></button>
+          <button class="btn" id="bAll">ابني الكل</button>
+          <button class="btn icon" id="bReset" aria-label="امسح وابني من الأول"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 4 ===== -->
+    <section class="screen" data-title="التنفيذ">
+      <div class="screen-head">
+        <div><span class="kicker">المرحلة 4</span><h2>التنفيذ: الكود جوه الجهاز</h2></div>
+        <div class="chips" id="ideChips"></div>
+      </div>
+      <div class="split">
+        <div class="ide">
+          <div class="ide-bar"><span class="d" style="background:#ff6b6b"></span><span class="d" style="background:#ffd27a"></span><span class="d" style="background:#7be0a5"></span><span class="tab">expression.py</span></div>
+          <div class="code" id="code"></div>
+        </div>
+        <div class="card mem">
+          <div><span class="label">الذاكرة</span><div class="mrow" id="memRow"></div></div>
+          <div><span class="label">النتيجة اللي حسبناها</span><div class="mrow" id="memRow2"></div></div>
+          <div><span class="label">الحسبة</span><div class="calcl" id="calcLane"></div></div>
+          <div><span class="label">الشاشة</span><div class="console"><span class="pr">&gt;&gt;&gt;</span><span id="conOut"></span></div></div>
+        </div>
+      </div>
+      <div class="dock">
+        <div class="av"><svg viewBox="56 36 128 112"><use href="#calcTop"/></svg></div>
+        <div class="txt" id="ideSay"></div>
+        <div class="controls">
+          <button class="btn blue" id="ideStep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>خطوة</button>
+          <button class="btn green" id="ideRun"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg><span>تشغيل تلقائي</span></button>
+          <button class="btn icon sndbtn" aria-label="الصوت"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4z"/><path class="w" d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/><path class="x" d="M16 9l6 6M22 9l-6 6"/></svg></button>
+          <button class="btn icon" id="ideReset" aria-label="من الأول"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 5 ===== -->
+    <section class="screen" data-title="الاختبار">
+      <div class="screen-head">
+        <div><span class="kicker">المرحلة 5</span><h2>الاختبار: اكتب أي معادلة</h2></div>
+        <p>رقم، عملية، رقم، =، إجابة</p>
+      </div>
+      <div class="split">
+        <div class="card tside">
+          <div>
+            <span class="label">Input</span>
+            <div class="test-in">
+              <input class="field" id="tIn" value="5 * 2 = 12" spellcheck="false" autocomplete="off">
+              <button class="btn green" id="tRun"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>شغّل</button>
+            </div>
+            <div class="err" id="tErr"></div>
+          </div>
+          <div><span class="label">أمثلة جاهزة</span><div class="chips" id="tChips"></div></div>
+          <div class="controls"><button class="btn" id="tRand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>معادلة عشوائية</button></div>
+          <div><span class="label">الآلة الحاسبة</span><div class="lcd"><div class="scr"><div class="up" id="tUp"></div><div class="main" id="tMain"></div></div></div></div>
+          <div><span class="label">Output</span><div class="outbig" id="tOut"></div></div>
+        </div>
+        <div class="card tvis tape">
+          <div class="eqwrap" id="tEq"></div>
+          <div class="tsteps" id="tSteps"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 6 ===== -->
+    <section class="screen" data-title="التطوير">
+      <div class="screen-head">
+        <div><span class="kicker">المرحلة 6</span><h2>التطوير: نخلي الحل أحسن</h2></div>
+        <div class="seg" id="seg">
+          <button class="on" data-v="0">بالشروط <b>12</b></button>
+          <button data-v="1">بقاموس <b>8</b></button>
+        </div>
+      </div>
+      <div class="split">
+        <div class="ide">
+          <div class="ide-bar"><span class="d" style="background:#ff6b6b"></span><span class="d" style="background:#ffd27a"></span><span class="d" style="background:#7be0a5"></span><span class="tab" id="impTab">expression.py</span></div>
+          <div class="code" id="impCode"></div>
+        </div>
+        <div class="card imp-card tape">
+          <h3><span class="an-ic" style="background:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M7 8v8M17 8v8"/></svg></span>التحدي الجاي: Two intervals</h3>
+          <p>فترتين على خط الأرقام… بيتقابلوا في حتة ولا لأ؟</p>
+          <svg class="art" viewBox="0 0 420 170" direction="ltr" font-family="Courier Prime" font-weight="700">
+            <path d="M20 110 H400" stroke="#22335b" stroke-width="3"/>
+            <rect x="60" y="62" width="170" height="20" rx="10" fill="#3f63d9" opacity=".85"/>
+            <rect x="180" y="88" width="170" height="20" rx="10" fill="#ff9f40" opacity=".85"/>
+            <rect x="180" y="58" width="50" height="54" rx="6" fill="none" stroke="#e23b3b" stroke-width="3" stroke-dasharray="6 5"/>
+            <text x="205" y="150" text-anchor="middle" fill="#e23b3b" font-size="22">?</text>
+          </svg>
+          <div class="controls"><button class="btn red" id="nextBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>شوف التلميح</button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bottom">
+    <button class="btn" id="prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span class="nav-txt">السابق</span></button>
+    <div class="hints" id="hints"></div>
+    <button class="btn blue" id="next"><span class="nav-txt">التالي</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+  </footer>
+</div>
+
+<div class="sheet-wrap" id="sheetWrap">
+  <div class="sheet" role="dialog" aria-modal="true">
+    <div class="grab"></div>
+    <div class="sheet-head">
+      <div class="av"><svg viewBox="56 36 128 112"><use href="#calcTop"/></svg></div>
+      <h3 id="sheetTitle"></h3>
+      <button class="x" id="sheetClose" aria-label="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+</div>
+
+<script>
+/* ================= logic ================= */
+const SAMPLES = ["5 * 2 = 12", "3 + 4 = 7", "9 - 6 = 3", "8 - 10 = 2"];
+const $ = id => document.getElementById(id);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const retrigger = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+const SYM = { '+':'+', '-':'−', '*':'×' };
+function parse(str){
+  const t = str.trim().split(/\s+/);
+  if (t.length !== 5 || t[3] !== '=' || !['+','-','*'].includes(t[1]) || ![t[0], t[2], t[4]].every(x => /^-?\d{1,6}$/.test(x))) return null;
+  const first = +t[0], sign = t[1], second = +t[2], answer = +t[4];
+  const result = sign === '+' ? first + second : sign === '-' ? first - second : first * second;
+  const ok = result === answer;
+  return { text:`${first} ${sign} ${second} = ${answer}`, first, sign, second, answer, result, ok, out: ok ? 'Yes' : String(result) };
+}
+
+/* ================= sounds (Web Audio, synthesized) ================= */
+let actx = null, soundOn = true, noiseBuf = null, master = null, revIn = null;
+function ac(){
+  if (!soundOn) return null;
+  try {
+    if (!actx){
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      const sr = actx.sampleRate;
+      // warm pink noise
+      noiseBuf = actx.createBuffer(1, sr * 2, sr);
+      const d = noiseBuf.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < d.length; i++){
+        const w = Math.random() * 2 - 1;
+        b0 = .99886 * b0 + w * .0555179; b1 = .99332 * b1 + w * .0750759; b2 = .969 * b2 + w * .153852;
+        b3 = .8665 * b3 + w * .3104856; b4 = .55 * b4 + w * .5329522; b5 = -.7616 * b5 - w * .016898;
+        d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * .5362) * .11; b6 = w * .115926;
+      }
+      // master: gentle compression, small room reverb
+      const comp = actx.createDynamicsCompressor();
+      comp.threshold.value = -20; comp.ratio.value = 3; comp.attack.value = .003; comp.release.value = .2;
+      master = actx.createGain(); master.gain.value = .85;
+      master.connect(comp); comp.connect(actx.destination);
+      const conv = actx.createConvolver();
+      const len = Math.floor(sr * 1.4), ir = actx.createBuffer(2, len, sr);
+      for (let ch = 0; ch < 2; ch++){ const x = ir.getChannelData(ch); for (let i = 0; i < len; i++) x[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+      conv.buffer = ir;
+      revIn = actx.createGain(); revIn.gain.value = .5;
+      const tone = actx.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = 5000;
+      revIn.connect(conv); conv.connect(tone); tone.connect(comp);
+    }
+    if (actx.state === 'suspended') actx.resume();
+    return actx;
+  } catch (e) { return null; }
+}
+function route(node, pan = 0, panTo = null, t = 0, dur = 0, rv = 0){
+  let n = node;
+  if (actx.createStereoPanner){
+    const p = actx.createStereoPanner();
+    p.pan.setValueAtTime(pan, t || actx.currentTime);
+    if (panTo !== null) p.pan.linearRampToValueAtTime(panTo, t + dur);
+    n.connect(p); n = p;
+  }
+  n.connect(master);
+  if (rv){ const sd = actx.createGain(); sd.gain.value = rv; n.connect(sd); sd.connect(revIn); }
+}
+function nz({ t, dur, type = 'bandpass', f0, f1 = f0, q = 1, peak = .2, a = .01, pan = 0, panTo = null, rv = 0 }){
+  const c = actx, src = c.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+  const f = c.createBiquadFilter(); f.type = type; f.Q.value = q;
+  f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
+  const g = c.createGain();
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + a); g.gain.setTargetAtTime(0, t + a, Math.max(.008, (dur - a) / 3.5));
+  src.connect(f); f.connect(g); route(g, pan, panTo, t, dur, rv);
+  src.start(t, Math.random() * 1.5); src.stop(t + dur + .3);
+}
+function os({ t, dur, f0, f1 = null, type = 'sine', peak = .1, a = .006, pan = 0, rv = 0 }){
+  const c = actx, o = c.createOscillator(); o.type = type;
+  o.frequency.setValueAtTime(f0, t); if (f1) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  const g = c.createGain();
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + a); g.gain.setTargetAtTime(0, t + a, Math.max(.01, (dur - a) / 4));
+  o.connect(g); route(g, pan, null, t, dur, rv);
+  o.start(t); o.stop(t + dur + .3);
+}
+/* soft FM bell: warm, glassy, never harsh */
+function bell(f, t, dur = .8, peak = .1, rv = .35, pan = 0){
+  const c = actx, car = c.createOscillator(), mod = c.createOscillator(), mg = c.createGain(), g = c.createGain();
+  car.frequency.value = f; mod.frequency.value = f * 2.01;
+  mg.gain.setValueAtTime(f * 1.1, t); mg.gain.setTargetAtTime(0, t, .07);
+  mod.connect(mg); mg.connect(car.frequency);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + .004); g.gain.setTargetAtTime(0, t + .004, dur / 4);
+  car.connect(g); route(g, pan, null, t, dur, rv);
+  car.start(t); mod.start(t); car.stop(t + dur + .4); mod.stop(t + dur + .4);
+}
+function knock(t, pan = 0, vol = 1){
+  nz({ t, dur:.07, f0:1100, q:8, peak:.45 * vol, a:.002, pan });
+  os({ t, dur:.14, f0:220, f1:165, peak:.22 * vol, a:.003, pan });
+}
+
+const now = () => actx.currentTime + .015;
+const SND = {
+  /* calculator key: short soft beep */
+  key(f = 1760){ if (!ac()) return; const t = now();
+    os({ t, dur:.07, f0:f, type:'triangle', peak:.07, a:.002 }); nz({ t, dur:.02, type:'highpass', f0:3000, q:.7, peak:.08, a:.001 }); },
+  /* pencil scribbling on paper */
+  scribble(dur = .5){ if (!ac()) return; const t = now(); const n = Math.round(dur * 14);
+    for (let i = 0; i < n; i++) nz({ t:t + i * dur / n, dur:.05 + Math.random() * .03, f0:2600 + Math.random() * 1500, q:2, peak:.06 + Math.random() * .05, a:.008, pan:(Math.random() - .5) * .4 }); },
+  /* red pen swipe across a wrong answer */
+  strike(){ if (!ac()) return; const t = now(); nz({ t, dur:.22, f0:1200, f1:3600, q:1.4, peak:.22, a:.02, pan:-.3, panTo:.3 }); },
+  /* check-mark tick + chime */
+  check(){ if (!ac()) return; const t = now(); nz({ t, dur:.12, f0:2400, f1:3800, q:1.6, peak:.18, a:.01 }); bell(1319, t + .08, .8, .11, .45, -.1); bell(1760, t + .16, .9, .09, .5, .1); },
+  tick(){ if (!ac()) return; const t = now(); nz({ t, dur:.04, f0:3400, f1:2600, q:2.5, peak:.2, a:.002 }); os({ t, dur:.04, f0:2200, peak:.03 }); },
+  yes(){ if (!ac()) return; const t = now(); bell(880, t, .7, .12, .35, -.15); bell(1319, t + .09, .8, .1, .4, .15); },
+  no(){ if (!ac()) return; const t = now(); os({ t, dur:.32, f0:392, f1:330, type:'triangle', peak:.1, a:.015 }); os({ t, dur:.32, f0:196, f1:165, peak:.08, a:.015 }); },
+  move(dur = .6){ if (!ac()) return; const t = now(); nz({ t, dur, f0:520, f1:2200, q:1.3, peak:.14, a:dur * .35, pan:-.35, panTo:.35 }); },
+  snap(){ if (!ac()) return; const t = now(); os({ t, dur:.22, f0:120, f1:55, peak:.3, a:.004 }); os({ t, dur:.06, f0:430, f1:950, peak:.09, a:.003 }); bell(1568, t + .04, .8, .08, .45, -.2); bell(2093, t + .07, .8, .06, .45, .2); },
+  type(){ if (!ac()) return; const t = now(); nz({ t, dur:.035, f0:1900, q:1.4, peak:.18, a:.002, pan:(Math.random() - .5) * .3 }); os({ t, dur:.04, f0:150, peak:.045, a:.002 }); },
+  win(){ if (!ac()) return; const t = now(); [1047, 1319, 1568, 2093].forEach((f, i) => bell(f, t + i * .1, 1.1, .1, .5, (i - 1.5) * .3)); [2637, 3136, 3951].forEach((f, i) => bell(f, t + .45 + i * .06, .6, .03, .6, (i - 1) * .6)); }
+};
+function setSound(on){ soundOn = on; document.querySelectorAll('.sndbtn').forEach(b => b.classList.toggle('off', !on)); }
+document.querySelectorAll('.sndbtn').forEach(b => b.onclick = () => setSound(!soundOn));
+
+/* ================= motion helpers ================= */
+const easeIO = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+function arcFrames(x0, y0, x1, y1, lift, rot = 0, sMid = 1.06, n = 36){
+  const f = [];
+  for (let i = 0; i <= n; i++){ const p = i / n, e = easeIO(p), b = Math.sin(Math.PI * e);
+    f.push({ transform:`translate(${x0 + (x1 - x0) * e}px,${y0 + (y1 - y0) * e - lift * b}px) rotate(${rot * b}deg) scale(${1 + (sMid - 1) * b})`, offset:p }); }
+  return f;
+}
+function squash(el, big = 1){
+  const k = [[0,0],[.16,-.2],[-.07,.09],[.035,-.04],[-.015,.018],[0,0]];
+  return el.animate(k.map(([x, y], i) => ({ transform:`scale(${1 + x * big},${1 + y * big})`, offset:i / (k.length - 1) })), { duration:560, easing:'linear' }).finished;
+}
+const SPARK_C = ['#ffe66d', '#2e9e5b', '#3f63d9', '#e23b3b', '#ff9f40'];
+function burst(x, y, n = 14, colors = SPARK_C){
+  const ring = document.createElement('div'); ring.className = 'ring'; ring.style.borderColor = colors[0]; document.body.appendChild(ring);
+  ring.animate([{ transform:`translate(${x - 6}px,${y - 6}px) scale(.3)`, width:'12px', height:'12px', opacity:1 }, { transform:`translate(${x - 34}px,${y - 34}px) scale(1)`, width:'68px', height:'68px', opacity:0 }],
+    { duration:560, easing:'cubic-bezier(.22,1,.36,1)', fill:'forwards' }).finished.then(() => ring.remove());
+  for (let i = 0; i < n; i++){
+    const d = document.createElement('div'), sz = 4 + Math.random() * 6;
+    d.className = 'spark' + (i % 3 === 0 ? ' st' : '');
+    Object.assign(d.style, { width:sz + 'px', height:sz + 'px', background:colors[i % colors.length] });
+    document.body.appendChild(d);
+    const a = Math.PI * 2 * i / n + Math.random() * .4, dist = 30 + Math.random() * 50;
+    d.animate([{ transform:`translate(${x}px,${y}px) scale(1)`, opacity:1 }, { transform:`translate(${x + Math.cos(a) * dist}px,${y + Math.sin(a) * dist - 12}px) scale(.2) rotate(270deg)`, opacity:0 }],
+      { duration:600 + Math.random() * 250, easing:'cubic-bezier(.2,.7,.3,1)', fill:'forwards' }).finished.then(() => d.remove());
+  }
+}
+const center = el => { const r = el.getBoundingClientRect(); return { x:r.left + r.width / 2, y:r.top + r.height / 2 }; };
+
+/* ================= homework equation component ================= */
+function makeSheet(box){
+  let r = null;
+  return {
+    async write(rr, animate = true){
+      r = rr;
+      box.innerHTML = `<div class="eq"><span class="a">${r.first}</span><span class="op">${r.sign}</span><span class="b">${r.second}</span><span>=</span><span class="ans">${r.answer}</span></div>`;
+      if (!animate) return;
+      const parts = [...box.querySelectorAll('.eq > span')];
+      parts.forEach(p => p.style.opacity = 0);
+      SND.scribble(.25 * parts.length);
+      for (const p of parts){
+        p.style.opacity = 1;
+        p.animate([{ clipPath:'inset(0 100% 0 0)', transform:'translateY(4px)' }, { clipPath:'inset(0 0 0 0)', transform:'none' }], { duration:220, easing:'ease-out' });
+        await wait(170);
+      }
+    },
+    async mark(){
+      const ans = box.querySelector('.ans');
+      if (r.ok){
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'check'); svg.setAttribute('viewBox', '0 0 60 60');
+        svg.innerHTML = '<path d="M8 32 L24 48 L54 10" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>';
+        ans.appendChild(svg);
+        SND.check();
+        await svg.querySelector('path').animate([{ strokeDashoffset:100 }, { strokeDashoffset:0 }], { duration:480, easing:'cubic-bezier(.4,0,.2,1)', fill:'forwards' }).finished;
+        const c = center(svg); burst(c.x, c.y, 16);
+      } else {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'strike'); svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('preserveAspectRatio', 'none');
+        svg.innerHTML = '<path d="M4 72 Q50 52 96 28" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" vector-effect="non-scaling-stroke"/>';
+        ans.appendChild(svg);
+        SND.strike();
+        await svg.querySelector('path').animate([{ strokeDashoffset:100 }, { strokeDashoffset:0 }], { duration:300, easing:'ease-out', fill:'forwards' }).finished;
+        const fix = document.createElement('span'); fix.className = 'fix'; fix.textContent = r.result; ans.appendChild(fix);
+        SND.scribble(.45);
+        await fix.animate([{ clipPath:'inset(0 100% 0 0)' }, { clipPath:'inset(0 0 0 0)' }], { duration:520, easing:'ease-out', fill:'forwards' }).finished;
+        squash(fix, .6);
+      }
+    }
+  };
+}
+/* calculator LCD: types the expression key by key, then shows the result */
+async function lcdCompute(upEl, mainEl, r, keyFn){
+  upEl.textContent = ''; mainEl.textContent = '';
+  const seq = [...String(r.first), SYM[r.sign], ...String(r.second)];
+  const raw = [...String(r.first), r.sign, ...String(r.second)];
+  for (let i = 0; i < seq.length; i++){
+    mainEl.textContent += seq[i]; SND.key(seq[i] === SYM[r.sign] ? 1320 : 1760); if (keyFn) keyFn(raw[i]); await wait(150);
+  }
+  SND.key(990); if (keyFn) keyFn('=');
+  upEl.textContent = mainEl.textContent + ' =';
+  mainEl.textContent = '';
+  await wait(160);
+  const target = r.result, steps = 10;
+  for (let i = 1; i <= steps; i++){
+    mainEl.textContent = i === steps ? target : Math.round(target * i / steps + (Math.random() - .5) * 6);
+    await wait(35);
+  }
+  SND.snap();
+}
+
+/* ================= navigation ================= */
+const screens = [...document.querySelectorAll('.screen')];
+let cur = 0;
+screens.forEach((s, i) => { const b = document.createElement('button'); b.className = 'step-btn'; b.innerHTML = `<i>${i+1}</i><span>${s.dataset.title}</span>`; b.onclick = () => go(i); $('stepper').appendChild(b); });
+function go(i){
+  if (i < 0 || i >= screens.length || i === cur) return;
+  screens[cur].classList.remove('active'); screens[i].classList.add('active');
+  cur = i; syncNav();
+  if (cur !== 2){ stopFlow(); stopBuildAll(); }
+  if (cur !== 3) stopIde();
+}
+function syncNav(){
+  [...$('stepper').children].forEach((b, i) => { b.classList.toggle('active', i === cur); b.classList.toggle('done', i < cur); });
+  $('prev').disabled = cur === 0; $('next').disabled = cur === screens.length - 1;
+  if (cur !== 0) $('next').classList.remove('pulse');
+}
+$('prev').onclick = () => go(cur - 1);
+$('next').onclick = () => go(cur + 1);
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'Escape') return closeSheet();
+  if ($('sheetWrap').classList.contains('open')) return;
+  if (e.key === 'ArrowLeft') go(cur + 1);
+  if (e.key === 'ArrowRight') go(cur - 1);
+});
+syncNav();
+
+/* ================= 1. homework game ================= */
+const HW = ["3 + 4 = 7", "5 * 2 = 12", "9 - 6 = 3", "4 * 4 = 16", "8 - 10 = 2", "6 + 7 = 14"];
+const gSheet = makeSheet($('gEq')), chr = $('calcChar');
+let gi = 0, gScore = 0, gBusy = false, res = [];
+const setFace = f => { chr.classList.remove('happy', 'oops', 'think', 'digits'); if (f) chr.classList.add(f); };
+function pressKey(k){ const el = document.querySelector(`#keys .key[data-k="${k}"]`); if (!el) return; el.classList.add('press'); setTimeout(() => el.classList.remove('press'), 120); }
+function renderDots(){ $('dots').innerHTML = HW.map((_, i) => `<i class="${res[i] === true ? 'ok' : res[i] === false ? 'no' : i === gi ? 'cur' : ''}"></i>`).join(''); $('score').textContent = `${gScore}/${HW.length}`; }
+async function loadHW(){
+  gBusy = true;
+  const r = parse(HW[gi]);
+  $('gOut').style.opacity = 0; $('gNote').textContent = '';
+  ['jY','jN'].forEach(id => { $(id).classList.remove('chosen'); $(id).disabled = true; $(id).style.display = ''; });
+  $('gNext').style.display = 'none';
+  setFace(null); $('lcdUp').textContent = ''; $('lcdMain').textContent = '';
+  renderDots();
+  chr.classList.add('write'); await gSheet.write(r); chr.classList.remove('write');
+  ['jY','jN'].forEach(id => $(id).disabled = false);
+  gBusy = false;
+}
+async function judge(saysOk){
+  if (gBusy) return; gBusy = true;
+  const r = parse(HW[gi]);
+  ['jY','jN'].forEach(id => $(id).disabled = true);
+  $(saysOk ? 'jY' : 'jN').classList.add('chosen'); SND.tick();
+  setFace('think'); await wait(350);
+  setFace('digits');
+  await lcdCompute($('lcdUp'), $('lcdMain'), r, pressKey);
+  await wait(250);
+  await gSheet.mark();
+  const right = saysOk === r.ok;
+  res[gi] = right; if (right) gScore++;
+  renderDots();
+  const o = $('gOut'); o.textContent = r.out; o.className = 'val ' + (r.ok ? 'y' : 'n');
+  o.animate([{ opacity:0, transform:'scale(.6)' }, { opacity:1, transform:'scale(1.1)', offset:.6 }, { opacity:1, transform:'scale(1)' }], { duration:450, easing:'cubic-bezier(.22,1,.36,1)', fill:'forwards' });
+  $('gNote').textContent = r.ok ? '(الإجابة صح)' : '(الإجابة الصح)';
+  await wait(400);
+  $('lcdUp').textContent = ''; $('lcdMain').textContent = '';
+  setFace(right ? 'happy' : 'oops');
+  if (right){ SND.yes(); $('calcSay').innerHTML = 'تصحيح ممتاز! <b>برافو</b>'; }
+  else { SND.no(); $('calcSay').innerHTML = r.ok ? 'الإجابة دي كانت <b>صح</b>!<br>المخرج <b>Yes</b>' : `الإجابة دي <b>غلط</b>!<br>المخرج الإجابة الصح: <b>${r.result}</b>`; }
+  retrigger($('calcSay'), 'pop');
+  ['jY','jN'].forEach(id => $(id).style.display = 'none');
+  const last = gi === HW.length - 1;
+  $('gNext').style.display = '';
+  $('gNext').innerHTML = last ? 'صحّح تاني' : 'المسألة الجاية<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+  if (last){ setTimeout(() => { SND.win(); $('calcSay').innerHTML = `خلّصنا الواجب!<br>صحّحت صح <b>${gScore} من ${HW.length}</b>`; retrigger($('calcSay'), 'pop'); }, 800); $('next').classList.add('pulse'); }
+  gBusy = false;
+}
+$('jY').onclick = () => judge(true);
+$('jN').onclick = () => judge(false);
+$('gNext').onclick = () => { if (gBusy) return; if (gi === HW.length - 1){ gi = 0; gScore = 0; res = []; } else gi++; loadHW(); };
+renderDots(); loadHW();
+
+/* ================= 2. analysis ================= */
+const anCards = [...document.querySelectorAll('.an')];
+const AN_SAY = [
+  'قبل الكود، لازم نفهم المسألة. دوس "اكشف"',
+  'السطر فيه 5 حاجات: رقم، عملية، رقم، علامة =، والإجابة المكتوبة',
+  'لو الإجابة صح نطبع <b>Yes</b>، ولو غلط نطبع الناتج الصح',
+  'خلي بالك: مفيش <b>No</b>، و <span class="ltr">*</span> يعني ضرب، ولازم <span class="ltr">int()</span>',
+  'الحل: نحسب الناتج الحقيقي حسب العملية، ونقارنه بالإجابة'
+];
+let an = 0;
+function renderAn(){
+  anCards.forEach((c, i) => { c.classList.toggle('locked', i >= an); c.classList.toggle('fresh', i === an - 1); });
+  $('anSay').innerHTML = AN_SAY[an];
+  $('anNextTxt').innerHTML = an >= 4 ? 'يلا للتصميم' : `اكشف <span class="ltr">(${an}/4)</span>`;
+}
+$('anNext').onclick = () => { if (an >= 4) return go(2); an++; SND.scribble(.3); renderAn(); };
+$('anReset').onclick = () => { an = 0; renderAn(); };
+renderAn();
+
+/* ================= 3. design ================= */
+const BUILD = [
+  { els:['n-start'], say:'كل برنامج ليه بداية' },
+  { els:['e-1','n-in'], say:'نقرا الـ 5 حاجات' },
+  { els:['e-2','n-d1','e-y1','n-p1'], say:'لو العملية <span class="ltr">+</span>: نجمع' },
+  { els:['e-n1','n-d2','e-y2','n-p2'], say:'لو <span class="ltr">-</span>: نطرح' },
+  { els:['e-n2','n-p3'], say:'غير كده تبقى <span class="ltr">*</span>: نضرب' },
+  { els:['e-m1','e-m2','e-m3','n-d3','e-y3','n-oR'], say:'نقارن الناتج بالإجابة. لو زي بعض نطبع Yes' },
+  { els:['e-n3','n-oW'], say:'لو مختلفين نطبع الناتج الصح' },
+  { els:['e-re','e-we','n-end'], say:'التصميم خلص! اختار مثال ودوس "تشغيل"' }
+];
+const NODE_LINE = { 'n-start':0, 'n-in':1, 'n-d1':2, 'n-p1':2, 'n-d2':3, 'n-p2':3, 'n-p3':4, 'n-d3':5, 'n-oR':5, 'n-oW':6, 'n-end':7 };
+const pLines = [...document.querySelectorAll('#pseudo li')];
+let built = 0, buildAllTimer = null;
+function buildStep(){
+  if (built >= BUILD.length) return;
+  document.querySelectorAll('#flow .fresh, #pseudo .fresh').forEach(el => el.classList.remove('fresh'));
+  const step = BUILD[built];
+  pLines[built].classList.add('show', 'fresh');
+  step.els.forEach((id, k) => setTimeout(() => { $(id).classList.add('show'); if (id.startsWith('n-')) $(id).classList.add('fresh'); }, k * 180));
+  SND.scribble(.25); $('dsSay').innerHTML = step.say;
+  built++; syncBuild();
+}
+function syncBuild(){
+  $('buildBar').style.width = (built / BUILD.length * 100) + '%';
+  const fin = built >= BUILD.length;
+  $('bNext').disabled = fin; $('bAll').disabled = fin;
+  $('bNextTxt').innerHTML = `ابني <span class="ltr">(${built}/${BUILD.length})</span>`;
+  $('trace').classList.toggle('locked', !fin);
+  if (fin) setTimeout(() => document.querySelectorAll('#flow .fresh').forEach(el => el.classList.remove('fresh')), 1000);
+}
+function stopBuildAll(){ clearInterval(buildAllTimer); buildAllTimer = null; }
+function resetBuild(){
+  stopBuildAll(); stopFlow(); resetTrace(); built = 0;
+  pLines.forEach(li => li.classList.remove('show','fresh','cur'));
+  document.querySelectorAll('#flow .node,#flow .edge').forEach(el => el.classList.remove('show','fresh'));
+  $('dsSay').innerHTML = 'يلا نبني الحل سوا. دوس "ابني"'; syncBuild();
+}
+$('bNext').onclick = () => { stopBuildAll(); buildStep(); };
+$('bAll').onclick = () => { if (buildAllTimer) return; buildStep(); buildAllTimer = setInterval(() => { if (built >= BUILD.length) return stopBuildAll(); buildStep(); }, 750); };
+$('bReset').onclick = resetBuild;
+
+let flowInput = SAMPLES[0], ideInput = SAMPLES[0], custom = null, flowTimer = null;
+function resetTrace(){
+  document.querySelectorAll('#flow .on,#flow .visited').forEach(el => el.classList.remove('on','visited'));
+  pLines.forEach(li => li.classList.remove('cur'));
+  $('fUp').textContent = ''; $('fMain').textContent = ''; $('fCmp').textContent = '—'; $('fOut').className = 'outbig'; $('fOut').textContent = '';
+}
+function stopFlow(){ clearTimeout(flowTimer); flowTimer = null; $('flowRun').disabled = false; }
+function runFlow(){
+  stopFlow(); resetTrace();
+  const r = parse(flowInput);
+  const q = [{ n:'n-start' }, { e:'e-1' }, { n:'n-in', fx:() => { $('fCmp').textContent = r.text; SND.move(.4); } }, { e:'e-2' }];
+  const ask = (s, ok) => () => { $('fCmp').innerHTML = `<span>sign == "${s}"</span><span class="${ok ? 't' : 'f'}">${ok ? 'True' : 'False'}</span>`; SND.tick(); setTimeout(ok ? SND.yes : SND.no, 230); };
+  const calc = () => { $('fCmp').innerHTML = `<span>result = ${r.first} ${r.sign} ${r.second}</span>`; lcdCompute($('fUp'), $('fMain'), r); };
+  q.push({ n:'n-d1', slow:true, fx:ask('+', r.sign === '+') });
+  if (r.sign === '+') q.push({ e:'e-y1' }, { n:'n-p1', slow:2, fx:calc }, { e:'e-m1' });
+  else {
+    q.push({ e:'e-n1' }, { n:'n-d2', slow:true, fx:ask('-', r.sign === '-') });
+    if (r.sign === '-') q.push({ e:'e-y2' }, { n:'n-p2', slow:2, fx:calc }, { e:'e-m2' });
+    else q.push({ e:'e-n2' }, { n:'n-p3', slow:2, fx:calc }, { e:'e-m3' });
+  }
+  q.push({ n:'n-d3', slow:true, fx:() => { $('fCmp').innerHTML = `<span>${r.result} == ${r.answer}</span><span class="${r.ok ? 't' : 'f'}">${r.ok ? 'True' : 'False'}</span>`; SND.tick(); setTimeout(r.ok ? SND.yes : SND.no, 230); } });
+  const out = () => { $('fOut').textContent = r.out; $('fOut').className = 'outbig ' + (r.ok ? 'y' : 'n'); SND.type(); setTimeout(SND.type, 100); };
+  if (r.ok) q.push({ e:'e-y3' }, { n:'n-oR', fx:out }, { e:'e-re' }); else q.push({ e:'e-n3' }, { n:'n-oW', fx:out }, { e:'e-we' });
+  q.push({ n:'n-end', fx:() => SND.win() });
+  let k = 0;
+  $('flowRun').disabled = true;
+  $('dsSay').innerHTML = `بنمشي على الفلوتشارت بالمدخل <span class="ltr">${flowInput}</span>`;
+  const tick = () => {
+    if (k >= q.length){ flowTimer = null; $('flowRun').disabled = false; $('dsSay').innerHTML = 'خلصنا! جرّب عملية تانية عشان تشوف طريق تاني'; return; }
+    const s = q[k++];
+    document.querySelectorAll('#flow .on').forEach(el => el.classList.remove('on'));
+    $(s.n || s.e).classList.add('on', 'visited');
+    if (s.n){ pLines.forEach(li => li.classList.remove('cur')); pLines[NODE_LINE[s.n]].classList.add('cur'); }
+    if (s.fx) s.fx();
+    flowTimer = setTimeout(tick, s.e ? 260 : s.slow === 2 ? 1900 : s.slow ? 1100 : 650);
+  };
+  tick();
+}
+$('flowRun').onclick = runFlow;
+resetBuild();
+
+/* ================= chips ================= */
+function renderChips(box, active, onPick){
+  const list = [...SAMPLES]; if (custom && !list.includes(custom)) list.push(custom);
+  box.innerHTML = '';
+  list.forEach(s => { const b = document.createElement('button'); b.className = 'chip' + (s === active ? ' active' : ''); b.textContent = s; b.onclick = () => onPick(s); box.appendChild(b); });
+}
+function refreshChips(){
+  renderChips($('flowChips'), flowInput, s => { flowInput = s; stopFlow(); resetTrace(); refreshChips(); });
+  renderChips($('ideChips'), ideInput, s => { if (ideBusy) return; ideInput = s; stopIde(); resetIde(); refreshChips(); });
+  renderChips($('tChips'), $('tIn').value.trim().replace(/\s+/g, ' '), s => { if (tBusy) return; $('tIn').value = s; runTest(true); });
+}
+
+/* ================= 4. IDE ================= */
+const F = '<span class="v1">first</span>', S = '<span class="v2">sign</span>', B = '<span class="v1">second</span>', A = '<span class="v3">answer</span>', R = '<span class="v4">result</span>';
+const CODE = [
+  `${F}, ${S}, ${B}, equal, ${A} = <span class="sf">input</span>().<span class="sf">split</span>()`,
+  `${F}, ${B}, ${A} = <span class="sf">int</span>(${F}), <span class="sf">int</span>(${B}), <span class="sf">int</span>(${A})`,
+  `<span class="sk">if</span> ${S} == <span class="ss">"+"</span>:`,
+  `    ${R} = ${F} + ${B}`,
+  `<span class="sk">elif</span> ${S} == <span class="ss">"-"</span>:`,
+  `    ${R} = ${F} - ${B}`,
+  `<span class="sk">else</span>:`,
+  `    ${R} = ${F} * ${B}`,
+  `<span class="sk">if</span> ${R} == ${A}:`,
+  `    <span class="sf">print</span>(<span class="ss">"Yes"</span>)`,
+  `<span class="sk">else</span>:`,
+  `    <span class="sf">print</span>(${R})`
+];
+const SHORT = [
+  `${F}, ${S}, ${B}, equal, ${A} = <span class="sf">input</span>().<span class="sf">split</span>()`,
+  `${F}, ${B}, ${A} = <span class="sf">int</span>(${F}), <span class="sf">int</span>(${B}), <span class="sf">int</span>(${A})`,
+  `ops = {`,
+  `    <span class="ss">"+"</span>: ${F} + ${B},`,
+  `    <span class="ss">"-"</span>: ${F} - ${B},`,
+  `    <span class="ss">"*"</span>: ${F} * ${B},`,
+  `}`,
+  `${R} = ops[${S}]; <span class="sf">print</span>(<span class="ss">"Yes"</span> <span class="sk">if</span> ${R} == ${A} <span class="sk">else</span> ${R})`
+];
+const codeHTML = lines => lines.map((l, i) => `<div class="ln"><span class="no">${i+1}</span><span>${l || ' '}</span></div>`).join('');
+$('code').innerHTML = codeHTML(CODE);
+const lnEls = [...$('code').querySelectorAll('.ln')];
+
+let IB = null, idePos = -1, ideTimer = null, ideBusy = false;
+const NAMES = { '+':'نجمع', '-':'نطرح', '*':'نضرب' };
+function ideBuild(r){
+  const L = [
+    { line:0, kind:'read', say:'<span class="ltr">split()</span> بتقسم السطر لـ 5 نصوص. العلامة <span class="ltr">"="</span> بنخزنها في equal ومش هنحتاجها' },
+    { line:1, kind:'int', say:'بنحوّل الأرقام التلاتة من نص لرقم، عشان الحساب يشتغل صح' },
+    { line:2, kind:'ask', s:'+', say:`هل العملية <span class="ltr">"+"</span>؟ ${r.sign === '+' ? '<b>أيوه</b>' : '<b>لأ</b>'}` }
+  ];
+  const calc = line => ({ line, kind:'calc', say:`${NAMES[r.sign]}: <span class="ltr">${r.first} ${r.sign} ${r.second} = ${r.result}</span>، والناتج بيتخزن في result` });
+  if (r.sign === '+') L.push(calc(3));
+  else {
+    L.push({ line:4, kind:'ask', s:'-', say:`هل العملية <span class="ltr">"-"</span>؟ ${r.sign === '-' ? '<b>أيوه</b>' : '<b>لأ</b>'}` });
+    if (r.sign === '-') L.push(calc(5)); else { L.push({ line:6, kind:'else', say:'لا ده ولا ده، يبقى ضرب' }); L.push(calc(7)); }
+  }
+  L.push({ line:8, kind:'check', say:`هل result (<span class="ltr">${r.result}</span>) يساوي answer (<span class="ltr">${r.answer}</span>)؟ ${r.ok ? '<b>أيوه</b>' : '<b>لأ</b>'}` });
+  if (r.ok) L.push({ line:9, kind:'print', say:'الإجابة صح، بنطبع <b>Yes</b>' });
+  else { L.push({ line:10, kind:'else', say:'الإجابة غلط، نروح على else' }); L.push({ line:11, kind:'print', say:`بنطبع الإجابة الصح: <b>${r.result}</b>` }); }
+  return { S:L, r };
+}
+function stateAt(k){
+  const r = IB.r, m = { first:null, sign:null, second:null, answer:null, result:null, types:'str', hl:[], calc:null, out:'', done:[] };
+  for (let i = 0; i <= k; i++){
+    const s = IB.S[i]; m.hl = []; m.calc = null; m.done.push(s.line);
+    if (s.kind === 'read'){ m.first = `"${r.first}"`; m.sign = `"${r.sign}"`; m.second = `"${r.second}"`; m.answer = `"${r.answer}"`; m.hl = ['first','sign','second','answer']; }
+    if (s.kind === 'int'){ m.first = r.first; m.second = r.second; m.answer = r.answer; m.types = 'int'; m.hl = ['first','second','answer']; m.calc = `<span>"${r.first}" + "${r.second}"</span><span class="f">"${r.first}${r.second}"</span><span class="ph2">من غير int</span>`; }
+    if (s.kind === 'ask'){ const ok = r.sign === s.s; m.hl = ['sign']; m.calc = `<span>"${r.sign}" == "${s.s}"</span><span class="${ok ? 't' : 'f'}">${ok ? 'True' : 'False'}</span>`; }
+    if (s.kind === 'calc'){ m.result = r.result; m.hl = ['result']; m.calc = `<span>${r.first} ${r.sign} ${r.second}</span><span class="b">=</span><span class="hl">${r.result}</span>`; }
+    if (s.kind === 'check'){ m.hl = ['result','answer']; m.calc = `<span>${r.result} == ${r.answer}</span><span class="${r.ok ? 't' : 'f'}">${r.ok ? 'True' : 'False'}</span>`; }
+    if (s.kind === 'print') m.out = r.out;
+  }
+  return m;
+}
+function mb(name, type, v, hl, extra = ''){
+  return `<div class="mbox${v === null ? ' empty' : ''}${hl.includes(name) ? ' cur' : ''} ${extra}" data-v="${name}"><span class="nm">${name}<span class="tag ${type}">${type}</span></span><b>${v === null ? '—' : v}</b></div>`;
+}
+function skipped(r){
+  const used = new Set(IB.S.map(s => s.line));
+  return [3,4,5,6,7,9,10,11].filter(x => !used.has(x));
+}
+function renderIde(memK = idePos, landed = true){
+  const m = stateAt(memK), st = IB.S[idePos], hl = landed ? m.hl : [];
+  const fin = idePos >= IB.S.length - 1, sk = fin ? skipped(IB.r) : [];
+  lnEls.forEach((el, i) => { el.classList.toggle('cur', !!st && st.line === i); el.classList.toggle('ran', m.done.includes(i)); el.classList.toggle('skip', sk.includes(i)); });
+  const t = m.types;
+  $('memRow').innerHTML = mb('first', t, m.first, hl) + mb('sign', 'str', m.sign, hl, 's') + mb('second', t, m.second, hl) + mb('answer', t, m.answer, hl);
+  $('memRow2').innerHTML = mb('result', 'int', m.result, hl, 'res');
+  $('calcLane').innerHTML = landed && m.calc ? m.calc : '<span class="ph2">هنا هتشوف كل حسبة وكل سؤال</span>';
+  $('conOut').innerHTML = m.out ? `<span class="${IB.r.ok ? 'y' : 'n'}">${m.out}</span>` : '';
+  $('ideSay').innerHTML = st ? st.say : 'دوس "خطوة" وتابع الكود';
+  $('ideStep').disabled = ideBusy || fin;
+}
+const boxB = n => document.querySelector(`.mem .mbox[data-v="${n}"] b`);
+function flyToken(text, from, to, dur, cls = ''){
+  const t = document.createElement('div'); t.className = 'token ' + cls; t.textContent = text; document.body.appendChild(t);
+  const w = t.offsetWidth, h = t.offsetHeight;
+  const fr = arcFrames(from.x - w / 2, from.y - h / 2, to.x - w / 2, to.y - h / 2, 50, 0, 1.12);
+  fr.forEach((k, i) => k.opacity = Math.min(1, i / 4));
+  return t.animate(fr, { duration:dur, easing:'linear', fill:'forwards' }).finished.then(() => t.remove());
+}
+async function animateStep(k){
+  const s = IB.S[k], r = IB.r, D = 760;
+  if (s.kind === 'read'){
+    const lr = lnEls[0].getBoundingClientRect(), from = { x:lr.left + lr.width * .6, y:lr.top + lr.height / 2 };
+    SND.move(1);
+    await Promise.all([['first', r.first], ['sign', r.sign], ['second', r.second], ['answer', r.answer]].map(([n, v], i) => wait(i * 110).then(() => flyToken(`"${v}"`, from, center(boxB(n)), D, n === 'sign' ? '' : 'b'))));
+  } else if (s.kind === 'int'){
+    for (const n of ['first','second','answer']){ const b = boxB(n); squash(b, .9); const c = center(b); burst(c.x, c.y, 7, ['#3f63d9', '#dbe5ff', '#ffe66d']); }
+    SND.snap(); await wait(450);
+  } else if (s.kind === 'ask'){
+    boxB('sign').parentElement.classList.add('cur'); SND.tick(); await wait(380); (r.sign === s.s ? SND.yes : SND.no)(); await wait(260);
+  } else if (s.kind === 'calc'){
+    SND.move(.8);
+    await Promise.all([flyToken(String(r.first), center(boxB('first')), center(boxB('result')), D, 'b'), wait(140).then(() => flyToken(String(r.second), center(boxB('second')), center(boxB('result')), D, 'b'))]);
+    for (let i = 0; i < 3; i++){ SND.key(1500 + i * 120); await wait(70); }
+  } else if (s.kind === 'check'){
+    [ 'result','answer' ].forEach(n => boxB(n).parentElement.classList.add('cur'));
+    SND.tick(); await wait(400); (r.ok ? SND.yes : SND.no)(); await wait(260);
+  } else if (s.kind === 'else'){ SND.tick(); await wait(320); }
+  else if (s.kind === 'print'){
+    SND.move(.7);
+    await flyToken(r.out, center(boxB('result')), center($('conOut').parentElement), 700, r.ok ? 'g' : 'r');
+  }
+}
+async function ideNext(){
+  if (ideBusy) return;
+  if (idePos >= IB.S.length - 1){ stopIde(); return; }
+  idePos++; ideBusy = true;
+  renderIde(idePos - 1, false);
+  await animateStep(idePos);
+  ideBusy = false;
+  renderIde(idePos, true);
+  const st = IB.S[idePos];
+  if (st.kind === 'read' || st.kind === 'calc'){ SND.snap(); (st.kind === 'read' ? ['first','sign','second','answer'] : ['result']).forEach(n => { const b = boxB(n); squash(b); const c = center(b); burst(c.x, c.y - 6, 8); }); }
+  if (st.kind === 'print'){ (IB.r.ok ? SND.check : SND.strike)(); setTimeout(SND.win, 250); const c = center($('conOut')); burst(c.x, c.y, 16); }
+  if (idePos >= IB.S.length - 1) stopIde();
+}
+function resetIde(){ IB = ideBuild(parse(ideInput)); idePos = -1; ideBusy = false; renderIde(); }
+function stopIde(){ clearInterval(ideTimer); ideTimer = null; $('ideRun').querySelector('span').textContent = 'تشغيل تلقائي'; }
+$('ideStep').onclick = () => { stopIde(); ideNext(); };
+$('ideReset').onclick = () => { if (ideBusy) return; stopIde(); resetIde(); };
+$('ideRun').onclick = () => {
+  if (ideTimer) return stopIde();
+  if (ideBusy) return;
+  if (idePos >= IB.S.length - 1) resetIde();
+  $('ideRun').querySelector('span').textContent = 'إيقاف';
+  ideNext(); ideTimer = setInterval(ideNext, 1900);
+};
+resetIde();
+
+/* ================= 5. test ================= */
+let tBusy = false;
+const tSheet = makeSheet($('tEq'));
+function prepTest(r){
+  tSheet.write(r, false);
+  $('tSteps').innerHTML = [
+    ['العملية', `"${r.sign}"`, ''],
+    ['الناتج الحقيقي', `${r.first} ${r.sign} ${r.second} = ${r.result}`, ''],
+    [`<span class="ltr">${r.result} == ${r.answer}</span> ؟`, r.ok ? 'True' : 'False', r.ok ? 't' : 'f']
+  ].map(([k, v, c], i) => `<div class="tstep" id="ts${i}"><span class="n">${i+1}</span><span>${k}</span><span class="r ${c}" id="tr${i}" data-v="${v.replace(/"/g, '&quot;')}"></span></div>`).join('');
+  $('tUp').textContent = ''; $('tMain').textContent = '';
+  $('tOut').className = 'outbig'; $('tOut').textContent = '';
+}
+async function runTest(animate = true){
+  if (tBusy) return;
+  const raw = $('tIn').value.trim().replace(/\s+/g, ' '), r = parse(raw);
+  if (!r){ $('tErr').textContent = 'اكتب: رقم، عملية (+ أو - أو *)، رقم، =، رقم، وبينهم مسافات'; retrigger($('tIn'), 'shake'); return; }
+  $('tErr').textContent = '';
+  if (!SAMPLES.includes(r.text)) custom = r.text;
+  $('tIn').value = r.text; refreshChips();
+  prepTest(r);
+  if (!animate) return;
+  tBusy = true; ['tRun','tRand'].forEach(id => $(id).disabled = true);
+  await tSheet.write(r, true);
+  const show = async (i, f) => { const row = $('ts' + i); row.classList.add('on'); SND.tick(); await wait(280); if (f) await f(); $('tr' + i).textContent = $('tr' + i).dataset.v; await wait(280); row.classList.remove('on'); row.classList.add('done'); };
+  await show(0);
+  await show(1, () => lcdCompute($('tUp'), $('tMain'), r));
+  await show(2, async () => { (r.ok ? SND.yes : SND.no)(); await wait(200); });
+  await tSheet.mark();
+  $('tOut').textContent = ''; $('tOut').className = 'outbig ' + (r.ok ? 'y' : 'n');
+  for (const ch of r.out){ $('tOut').textContent += ch; SND.type(); await wait(80); }
+  SND.win();
+  ['tRun','tRand'].forEach(id => $(id).disabled = false); tBusy = false;
+}
+$('tRun').onclick = () => runTest(true);
+$('tIn').addEventListener('keydown', e => { if (e.key === 'Enter') runTest(true); });
+$('tRand').onclick = () => {
+  if (tBusy) return;
+  const a = Math.floor(Math.random() * 13), b = Math.floor(Math.random() * 13), s = '+-*'[Math.floor(Math.random() * 3)];
+  const real = s === '+' ? a + b : s === '-' ? a - b : a * b;
+  const c = Math.random() < .5 ? real : real + (Math.random() < .5 ? -1 : 1) * (1 + Math.floor(Math.random() * 4));
+  $('tIn').value = `${a} ${s} ${b} = ${c}`; runTest(true);
+};
+refreshChips(); runTest(false);
+
+/* ================= 6. improve ================= */
+function showVersion(v){
+  [...$('seg').children].forEach(b => b.classList.toggle('on', +b.dataset.v === v));
+  $('impCode').innerHTML = codeHTML(v ? SHORT : CODE);
+  $('impTab').textContent = v ? 'expression_dict.py' : 'expression.py';
+}
+[...$('seg').children].forEach(b => b.onclick = () => showVersion(+b.dataset.v));
+showVersion(0);
+$('nextBtn').onclick = () => openSheet('next');
+
+/* ================= hints ================= */
+const AR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const SHEETS = {
+  out: {
+    label:'المخرج مش No', title:'لو غلط… نكتب الصح',
+    icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+    html:`<p>زي المدرس بالظبط: لو الإجابة صح بيكتب Yes، ولو غلط بيكتب الإجابة الصح.</p>
+      <div class="steps-mini"><span class="s">3 + 4 = 7</span>${AR}<span class="s g">Yes</span></div>
+      <div class="steps-mini"><span class="s">5 * 2 = 12</span>${AR}<span class="s r">10</span></div>`
+  },
+  str: {
+    label:'ليه int؟', title:'النص بيتلزق مش بيتجمع',
+    icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></svg>',
+    html:`<p><span class="ltr">input().split()</span> بترجّع نصوص. لو جمعنا نصين بيتلزقوا جنب بعض:</p>
+      <pre class="snip">"3" + "4"            # "34"
+int("3") + int("4")  # 7</pre>`
+  },
+  star: {
+    label:'* يعني ضرب', title:'علامة الضرب في البرمجة',
+    icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M6 8l12 8M18 8L6 16"/></svg>',
+    html:`<p>الكيبورد مفيهوش ×، فالبرمجة بتستخدم النجمة <span class="ltr">*</span> للضرب.</p>
+      <div class="steps-mini"><span class="s">5 × 2</span>${AR}<span class="s g">5 * 2</span></div>
+      <p style="margin-top:8px">وكمان <span class="ltr">-</span> للطرح و <span class="ltr">+</span> للجمع، زي الرياضيات.</p>`
+  },
+  dict: {
+    label:'قاموس العمليات', title:'العلامة بتختار الحسبة',
+    icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg>',
+    html:`<p>بدل 3 شروط، نحط النتايج التلاتة في قاموس، والعلامة نفسها تختار:</p>
+      <pre class="snip">ops = {"+": 5 + 2, "-": 5 - 2, "*": 5 * 2}
+ops["*"]   # 10</pre>`
+  }
+};
+const NEXT = {
+  title:'التحدي الجاي: Two intervals',
+  html:`<div class="nx">
+    <div class="g">فترتين على خط الأرقام… <b>بيتقابلوا</b> في حتة ولا لأ؟</div>
+    <svg class="art" viewBox="0 0 640 230" direction="ltr" font-family="Courier Prime" font-weight="700">
+      <path d="M30 160 H610" stroke="#22335b" stroke-width="4"/>
+      <g fill="#22335b" font-size="18" text-anchor="middle">${[0,1,2,3,4,5,6,7,8,9,10].map(i => `<path d="M${60 + i * 52} 152 V168" stroke="#22335b" stroke-width="3"/><text x="${60 + i * 52}" y="196">${i}</text>`).join('')}</g>
+      <rect x="112" y="78" width="260" height="30" rx="15" fill="#3f63d9" opacity=".85"/>
+      <rect x="268" y="114" width="260" height="30" rx="15" fill="#ff9f40" opacity=".85"/>
+      <rect x="262" y="70" width="116" height="82" rx="10" fill="none" stroke="#e23b3b" stroke-width="4" stroke-dasharray="9 7"/>
+      <text x="320" y="56" text-anchor="middle" fill="#e23b3b" font-size="30">?</text>
+    </svg>
+    <div class="tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>ارسم الفترتين على ورقة الأول: الجزء المشترك بيبدأ منين وبيخلص فين؟</div>
+    <div class="try">اقرأ المسألة وجرّب بنفسك الأول · <a href="https://codeforces.com/group/MWSDmqGsZm/contest/219158/problem/X" target="_blank" rel="noopener">افتح Two intervals</a></div>
+  </div>`
+};
+Object.entries(SHEETS).forEach(([k, s]) => { const b = document.createElement('button'); b.className = 'hint-btn'; b.innerHTML = `${s.icon}<span>${s.label}</span>`; b.onclick = () => openSheet(k); $('hints').appendChild(b); });
+function openSheet(k){
+  const d = k === 'next' ? NEXT : SHEETS[k];
+  document.querySelector('.sheet').className = 'sheet' + (k === 'next' ? ' big' : '');
+  $('sheetTitle').textContent = d.title; $('sheetBody').innerHTML = d.html; $('sheetWrap').classList.add('open');
+}
+function closeSheet(){ $('sheetWrap').classList.remove('open'); }
+$('sheetClose').onclick = closeSheet;
+$('sheetWrap').onclick = e => { if (e.target.id === 'sheetWrap') closeSheet(); };
+</script>
+</body>
+</html>
